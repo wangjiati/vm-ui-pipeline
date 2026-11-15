@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "guestRoot": "C:\\VmUiPipeline",
+  "artifact": {
+    "path": "artifacts\\app\\SampleApp",
+    "exe": "SampleApp.exe"
+  },
+  "runner": {
+    "path": "artifacts\\publish\\VmUiPipeline.Runner.exe"
+  },
+  "suite": {
+    "assembly": "artifacts\\suites\\SampleTests\\SampleTests.dll",
+    "type": "SampleTests.SampleSuite"
+  },
+  "launcher": {
+    "type": "win-simple-ssh",
+    "sshcPath": "external\\WinSimpleSSH\\src\\SSHClient\\bin\\Release\\net452\\SSHC.exe",
+    "sshServerExe": "external\\WinSimpleSSH\\src\\SSHServer\\bin\\Release\\net452\\SSHServer.exe",
+    "port": 22222,
+    "ipWhitelist": ["192.168.221.*"],
+    "vmrunPath": "C:\\Program Files (x86)\\VMware\\VMware Workstation\\vmrun.exe"
+  },
+  "vms": [
+    {
+      "name": "win11",
+      "address": "192.168.221.130",
+      "user": "win11",
+      "passwordEnv": "VM_WIN11_PASSWORD",
+      "vmx": "D:\\VMs\\Win11\\Win11.vmx",
+      "snapshot": "initial"
+    }
+  ],
+  "recording": {
+    "enabled": false,
+    "ffmpegPath": "ffmpeg.exe",
+    "fps": 10
+  },
+  "timeoutMinutes": 5,
+  "startupTimeoutSeconds": 45,
+  "resultsDirectory": "artifacts\\results"
+}

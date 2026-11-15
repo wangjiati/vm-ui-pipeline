@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/wangjiati/vm-ui-pipeline/schema/pipeline.schema.json",
+  "title": "VM UI Pipeline configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifact", "runner", "suite", "launcher", "vms"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "guestRoot": {
+      "type": "string",
+      "pattern": "^[A-Za-z]:\\\\",
+      "description": "Absolute guest directory used for staged files. Default C:\\VmUiPipeline."
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "exe"],
+      "properties": {
+        "path": { "type": "string", "description": "Directory or .zip containing the application." },
+        "exe": { "type": "string", "description": "Executable path relative to the artifact root." },
+        "arguments": { "type": "string", "description": "Arguments passed to the application on launch." },
+        "processName": { "type": "string", "description": "Process name used to find the main window and stop stale instances." }
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "description": "Path to VmUiPipeline.Runner.exe." }
+      }
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assembly", "type"],
+      "properties": {
+        "assembly": { "type": "string", "description": "Test suite assembly implementing IUiTestSuite." },
+        "type": { "type": "string", "description": "Full name of the IUiTestSuite implementation." },
+        "folder": { "type": "string", "description": "Folder passed to the suite as --folder. A guest path for VM runs." },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean"] },
+          "description": "Additional --param key=value pairs exposed through UiTestContext.Parameters."
+        }
+      }
+    },
+    "fixtures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "destination"],
+        "properties": {
+          "source": { "type": "string" },
+          "destination": { "type": "string" },
+          "clean": { "type": "boolean", "default": true }
+        }
+      }
+    },
+    "launcher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sshcPath", "sshServerExe", "ipWhitelist"],
+      "properties": {
+        "type": { "const": "win-simple-ssh" },
+        "sshcPath": { "type": "string" },
+        "sshServerExe": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535, "default": 22222 },
+        "ipWhitelist": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "vmrunPath": { "type": "string" }
+      }
+    },
+    "vms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "address": { "type": "string" },
+          "user": { "type": "string" },
+          "passwordEnv": { "type": "string" },
+          "shareName": { "type": "string", "default": "c$" },
+          "vmx": { "type": "string" },
+          "snapshot": { "type": "string" }
+        }
+      }
+    },
+    "recording": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "ffmpegPath": { "type": "string", "description": "ffmpeg path on the guest (or PATH name)." },
+        "fps": { "type": "integer", "minimum": 1, "maximum": 60, "default": 10 }
+      }
+    },
+    "timeoutMinutes": { "type": "integer", "minimum": 1, "default": 10 },
+    "startupTimeoutSeconds": { "type": "integer", "minimum": 1, "default": 60 },
+    "resultsDirectory": { "type": "string" }
+  }
+}

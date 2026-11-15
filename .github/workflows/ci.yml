@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        run: dotnet build VmUiPipeline.sln -c Release -v:minimal
+
+      - name: Unit tests
+        run: ./tests/VmUiPipeline.Tests/bin/Release/net10.0-windows/VmUiPipeline.Tests.exe
+
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Host tests
+        shell: pwsh
+        run: ./tests/run-host-tests.ps1
+
+      - name: Publish runner
+        run: >
+          dotnet publish src/VmUiPipeline.Runner -c Release -r win-x64
+          --self-contained true -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/publish
+
+      - name: Upload runner
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner
+          path: artifacts/publish/

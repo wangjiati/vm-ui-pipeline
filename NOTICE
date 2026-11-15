@@ -1,0 +1,22 @@
+VM UI Pipeline
+Copyright (c) Files Community and VmUiPipeline contributors
+
+This project is derived from the UI test pipeline that lived under
+`tools/ui-pipeline` in the Files repository:
+
+  https://github.com/files-community/Files
+  Licensed under the Mozilla Public License 2.0 (MPL-2.0).
+
+The Files filter acceptance suite in `samples/FilesFilterTests` is a port of that
+pipeline's original test program.
+
+WinSimpleSSH is an external dependency used only to launch a process in a guest's
+interactive desktop session:
+
+  https://github.com/wangjiati/WinSimpleSSH
+
+It is not included in this repository or in release artifacts. The upstream project
+has no license file; obtain and build it yourself and review its terms.
+
+ffmpeg is not included. If you enable recording, you supply the ffmpeg binary in the
+guest.
