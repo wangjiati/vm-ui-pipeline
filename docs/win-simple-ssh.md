@@ -8,10 +8,10 @@ WinSimpleSSH 是外部项目：<https://github.com/wangjiati/WinSimpleSSH>。
 只做一件事：
 
 ```powershell
-SSHC start <vm-ip> -u <user> --port 22222 C:\VmUiPipeline\run.cmd
+SSHC start <vm-ip> -u <user> --port 22222 wscript.exe C:\VmUiPipeline\run.vbs
 ```
 
-该命令让客户机上的 WinSimpleSSH 服务在**已登录用户的交互式控制台会话**中启动 `run.cmd`。随后 Runner 启动应用、驱动 UI Automation、写结果、截图，并按需录屏。
+该命令让客户机上的 WinSimpleSSH 服务在**已登录用户的交互式控制台会话**中启动 `wscript.exe`；`run.vbs` 再以隐藏窗口运行 `run.cmd`，避免桌面上出现控制台窗口。随后 Runner 启动应用、驱动 UI Automation、写结果、截图，并按需录屏。
 
 普通远程执行通道（SSH、WinRM、不带 `-i` 的 PsExec、CI Agent、非交互式计划任务）会落在 session 0。session 0 没有桌面，UI Automation 找不到窗口。这就是引入该依赖的全部原因。
 
@@ -31,7 +31,7 @@ SSHC start <vm-ip> -u <user> --port 22222 C:\VmUiPipeline\run.cmd
 
 | 调用 | 用途 |
 | --- | --- |
-| `SSHC start` | 在交互式会话中启动 `C:\VmUiPipeline\run.cmd`。 |
+| `SSHC start` | 在交互式会话中启动 `wscript.exe C:\VmUiPipeline\run.vbs`，由它隐藏运行 `run.cmd`。 |
 | `SSHC exec` | 运行前结束残留的 `Files.exe` / `VmUiPipeline.Runner.exe`。 |
 | `SSHServer.exe --install` | 通过 WMI `Win32_Process.Create` 安装一次服务。 |
 

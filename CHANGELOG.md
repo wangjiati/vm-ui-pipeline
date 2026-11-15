@@ -1,5 +1,14 @@
 # 更新日志
 
+## 0.1.3
+
+- 新增 `samples/DemoTests` 与 `demos/`：真实 VM 中的截图与录屏演示，并把结果图片、GIF、MP4 放入 `docs/assets/demos/`。
+- 新增 `demos/run-demo.ps1`：一键构建 Runner、示例应用、演示套件并运行截图/录屏。
+- Runner 启动前隐藏客户机桌面上残留的控制台窗口，避免污染截图与录像。
+- `run.cmd` 改用 `wscript.exe` 隐藏窗口启动，并切换到 UTF-8 代码页，修复中文控制台日志乱码。
+- WinSimpleSSH 的“认证成功”stderr 提示不再在 PowerShell 5.1 下被误判为终止错误。
+- 演示验证：Windows 11 虚拟机，4/4 用例通过，8.3 秒 MP4。
+
 ## 0.1.2
 
 - 所有说明文件改为中文：README、贡献指南、安全策略、行为准则、架构、配置、安全、排障、WinSimpleSSH 依赖说明。

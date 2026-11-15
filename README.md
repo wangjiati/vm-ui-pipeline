@@ -14,12 +14,12 @@
 │ PowerShell 编排器                                                 │
 │   • 展开产物并校验 SHA-256                                        │
 │   • 通过 SMB 投放应用、Runner、套件与夹具 ───────────────────┐    │
-│   • 通过 WinSimpleSSH 启动 run.cmd ──────────────────────┐    │    │
+│   • 通过 WinSimpleSSH 启动 run.vbs ──────────────────────┐    │    │
 │   • 回收 JSON、JUnit、截图、MP4 ◄───────────────────────┼────┼────┘
 └─────────────────────────────────────────────────────────┼────┼─────┘
                                                           │    │
 ┌──────────────────── 虚拟机（交互式桌面）────────────────▼────▼─────┐
-│  C:\VmUiPipeline\run.cmd                                          │
+│  C:\VmUiPipeline\run.vbs → run.cmd                                │
 │    └─ VmUiPipeline.Runner                                         │
 │         ├─ 启动被测应用                                           │
 │         ├─ 通过 UI Automation 驱动应用                            │
@@ -48,6 +48,26 @@ Windows 服务与 CI Agent 默认运行在 **session 0**，没有交互式桌面
 - 机器可读结果、供 CI 使用的 JUnit XML、Markdown 报告。
 - 多 VM 聚合，逐 VM 统计通过/失败，退出码明确。
 - 原 Files 筛选验收套件保留为示例。
+
+## 示例演示：截图与录屏
+
+演示套件在 Windows 11 虚拟机里真实执行，每一步都在客户机内截图；录屏模式还会生成 MP4。
+
+![录屏演示](docs/assets/demos/session.gif)
+
+| 步骤 | 截图 |
+| --- | --- |
+| 启动示例应用 | ![启动](docs/assets/demos/win11-01-launch.png) |
+| 输入 `zip` 并筛选 | ![筛选](docs/assets/demos/win11-02-filter.png) |
+| 勾选搜索子文件夹 | ![递归](docs/assets/demos/win11-03-recurse.png) |
+| 清除筛选 | ![清除](docs/assets/demos/win11-04-clear.png) |
+
+```powershell
+$env:VM_WIN11_PASSWORD = '<客户机密码>'
+.\demos\run-demo.ps1 -Mode both
+```
+
+完整说明与结果目录见 [docs/demos.md](docs/demos.md)。
 
 ## 环境要求
 
@@ -183,10 +203,10 @@ Runner 会在客户机启动 `ffmpeg` 的 `gdigrab` 桌面输入，录制到 `C:
 WinSimpleSSH **不是测试框架**，只负责在虚拟机的已登录桌面会话里启动一个进程：
 
 ```powershell
-SSHC start <vm-ip> -u <user> C:\VmUiPipeline\run.cmd
+SSHC start <vm-ip> -u <user> wscript.exe C:\VmUiPipeline\run.vbs
 ```
 
-它的 Windows 服务（`SSHServer.exe`，LocalSystem）调用 `WTSGetActiveConsoleSessionId`、`WTSQueryUserToken`、`CreateProcessAsUser`，并把 `lpDesktop` 设为 `WinSta0\Default`。这是引入它的唯一原因。其余职责完全独立：
+`run.vbs` 再以隐藏窗口运行 `run.cmd`，避免客户机桌面出现控制台窗口。它的 Windows 服务（`SSHServer.exe`，LocalSystem）调用 `WTSGetActiveConsoleSessionId`、`WTSQueryUserToken`、`CreateProcessAsUser`，并把 `lpDesktop` 设为 `WinSta0\Default`。这是引入它的唯一原因。其余职责完全独立：
 
 | 关注点 | 负责方 |
 | --- | --- |
@@ -214,7 +234,9 @@ src/VmUiPipeline.Runner/    客户机测试宿主（单文件 EXE）
 host/VmUiPipeline/          PowerShell 编排模块
 samples/SampleApp/          用于冒烟测试的自包含 WPF 应用
 samples/SampleTests/        示例套件（启动、筛选、递归、清除、截图）
+samples/DemoTests/          截图与录屏演示套件
 samples/FilesFilterTests/   原 Files 筛选验收套件
+demos/                      演示配置与运行脚本
 tests/VmUiPipeline.Tests/   C# 单元测试
 tests/host/                 编排层 Pester 测试
 docs/                       架构、配置、依赖、安全与排障
@@ -222,7 +244,7 @@ docs/                       架构、配置、依赖、安全与排障
 
 ## 当前状态
 
-v0.1.2 为源码版本：解决方案可构建，C# 单元测试与编排层 Pester 测试通过，VM 流程已实现。**没有在本机环境完成 VM 端到端验证**：该环境的 `vmrun` 无法启动测试虚拟机，且本项目禁止在宿主机执行 UI 测试。请先在你自己的 VM 矩阵上跑通再依赖它；失败与验证模型见 [docs/architecture.md](docs/architecture.md)。
+v0.1.3 为源码版本：解决方案可构建，C# 单元测试与编排层 Pester 测试通过，截图与录屏演示已在 Windows 11 测试虚拟机中真实跑通。**Files 筛选用例尚未做 VM 端到端验证**；请先在你自己的 VM 矩阵上跑通再依赖它，失败与验证模型见 [docs/architecture.md](docs/architecture.md)。
 
 ## 许可证
 

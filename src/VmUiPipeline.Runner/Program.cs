@@ -115,6 +115,9 @@ internal static class Program
 
         log.Write($"suiteName={suite.Name}");
 
+        var hiddenWindows = WindowHider.HideConsoleWindows();
+        log.Write($"隐藏客户机控制台窗口：{hiddenWindows} 个");
+
         ScreenRecorder? recorder = null;
         if (!string.IsNullOrWhiteSpace(options.RecordPath))
         {

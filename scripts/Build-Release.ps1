@@ -6,7 +6,7 @@
 构建包含源码、Runner 与示例的发布 ZIP。
 #>
 param(
-    [string]$Version = '0.1.2',
+    [string]$Version = '0.1.3',
     [string]$OutputDirectory = 'artifacts\release'
 )
 
@@ -35,7 +35,7 @@ Write-Host 'Publishing sample app'
 if ($LASTEXITCODE -ne 0) { throw "Sample app publish failed with exit code $LASTEXITCODE." }
 
 Write-Host 'Publishing sample suites'
-foreach ($suite in @('SampleTests', 'FilesFilterTests')) {
+foreach ($suite in @('SampleTests', 'DemoTests', 'FilesFilterTests')) {
     & dotnet publish (Join-Path $root "samples\$suite\$suite.csproj") `
         -c Release -o (Join-Path $stage "samples\$suite")
     if ($LASTEXITCODE -ne 0) { throw "$suite publish failed with exit code $LASTEXITCODE." }
@@ -45,6 +45,7 @@ Write-Host 'Copying host and docs'
 Copy-Item -LiteralPath (Join-Path $root 'host') -Destination $stage -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $root 'schema') -Destination $stage -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $root 'docs') -Destination $stage -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $root 'demos') -Destination $stage -Recurse -Force
 foreach ($file in @(
     'vm-ui-pipeline.ps1',
     'pipeline.example.json',

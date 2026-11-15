@@ -531,6 +531,8 @@ function Invoke-RemoteVmRun {
         $scriptContent = New-VmRunCommand -RunnerPath $runnerGuestPath -Arguments $runnerArguments `
             -ResultsDirectory (Join-Path $guestRoot 'results') -GuestRoot $guestRoot
         Write-Utf8File -Path (Join-Path $uncRoot 'run.cmd') -Content $scriptContent
+        $launcherContent = New-VmRunVbs -RunCommandPath (Join-Path $guestRoot 'run.cmd')
+        Write-Utf8File -Path (Join-Path $uncRoot 'run.vbs') -Content $launcherContent
 
         Write-Host "    starting WinSimpleSSH service if needed"
         Initialize-VmSshService -Vm $Vm -Launcher $Config.Launcher -Password $password `
@@ -544,11 +546,11 @@ function Invoke-RemoteVmRun {
         }
 
         Write-Host "    stopping stale guest processes"
-        Stop-VmSshProcesses -Vm $Vm -Launcher $Config.Launcher -Password $password -ProcessNames @($appProcessName, 'VmUiPipeline.Runner')
+        Stop-VmSshProcesses -Vm $Vm -Launcher $Config.Launcher -Password $password -ProcessNames @($appProcessName, 'VmUiPipeline.Runner', 'wscript')
 
         Write-Host "    launching runner in the interactive desktop session"
         Start-VmSshProcess -Vm $Vm -Launcher $Config.Launcher -Password $password `
-            -Program (Join-Path $guestRoot 'run.cmd')
+            -Program ('wscript.exe ' + (Join-Path $guestRoot 'run.vbs'))
 
         $wait = Wait-VmSummary -SummaryPath (Join-Path $uncResults 'summary.json') `
             -ExitCodePath (Join-Path $uncResults 'exitcode.txt') `
@@ -1084,12 +1086,28 @@ function New-VmRunCommand {
     $exitCodeFile = Join-Path $ResultsDirectory 'exitcode.txt'
     $lines = @(
         '@echo off',
+        'chcp 65001 >nul',
         ('cd /d "' + $GuestRoot + '"'),
         (($quoted -join ' ') + ' > "' + $consoleLog + '" 2>&1'),
         ('echo %ERRORLEVEL% > "' + $exitCodeFile + '"')
     )
 
     return (($lines -join "`r`n") + "`r`n")
+}
+
+function New-VmRunVbs {
+    param(
+        [Parameter(Mandatory = $true)][string]$RunCommandPath
+    )
+
+    # 用 wscript 以隐藏窗口启动 run.cmd，避免客户机桌面上出现控制台窗口，
+    # 污染截图与录像。
+    $content = @"
+Set shell = CreateObject("WScript.Shell")
+shell.Run "cmd.exe /c ""$RunCommandPath""", 0, True
+"@
+
+    return ($content -replace "`r?`n", "`r`n") + "`r`n"
 }
 
 function Write-Utf8File {

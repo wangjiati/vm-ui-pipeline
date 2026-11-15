@@ -22,7 +22,7 @@
 | `VmUiPipeline.Runner` | 客户机 | 加载套件、启动应用、执行测试、写结果、截图、录屏 |
 | `VmUiPipeline.Testing` | 客户机 | UI Automation 辅助、等待、断言、结果模型 |
 | 测试套件程序集 | 客户机 | 实现 `IUiTestSuite` 的应用专用测试 |
-| WinSimpleSSH | 客户机 | 在交互式控制台会话中启动 `run.cmd` |
+| WinSimpleSSH | 客户机 | 在交互式控制台会话中启动 `wscript.exe` 与 `run.vbs` |
 | SMB 管理共享 | 客户机 | 双向文件传输 |
 
 ## 端到端时序
@@ -36,9 +36,9 @@
  │ 4. 映射 \\vm\c$ ─────────────────────►│
  │ 5. robocopy 应用/Runner/套件 ────────►│ C:\VmUiPipeline\{app,runner,suite}
  │ 6. robocopy 夹具 ────────────────────►│ C:\FilterTest（或配置路径）
- │ 7. 写入 run.cmd ─────────────────────►│ C:\VmUiPipeline\run.cmd
+ │ 7. 写入 run.cmd 与 run.vbs ──────────►│ C:\VmUiPipeline\run.cmd、run.vbs
  │ 8. 按需安装 WinSimpleSSH ────────────►│ 服务监听 :22222
- │ 9. SSHC start run.cmd ───────────────►│ 交互式桌面
+ │ 9. SSHC start run.vbs ───────────────►│ 交互式桌面（隐藏控制台）
  │                                       │ 10. Runner 启动应用
  │                                       │ 11. UI Automation + 断言
  │                                       │ 12. 截图 / ffmpeg
@@ -57,7 +57,8 @@ C:\VmUiPipeline\
 ├─ fixtures\            # 可选夹具暂存区
 ├─ results\             # summary.json、run.log、results.txt、截图、session.mp4
 ├─ ssh\                 # SSHServer.exe 与 server.json
-└─ run.cmd              # 生成的启动脚本
+├─ run.cmd              # 生成的启动脚本（由 run.vbs 隐藏运行）
+└─ run.vbs              # 隐藏控制台启动器
 ```
 
 夹具可以通过 `fixtures[].destination` 指向 `guestRoot` 之外的路径（例如 `C:\FilterTest`）。
@@ -144,7 +145,7 @@ public sealed class SampleSuite : IUiTestSuite
 
 ## 截图
 
-`VmUiPipeline.Testing.ScreenshotCapture` 使用 `System.Windows.Forms.Screen.PrimaryScreen` 与 `Graphics.CopyFromScreen`，把 PNG 保存到 `<out>/screenshots/`。Runner 位于客户机交互式会话，因此只会截取客户机桌面。
+`VmUiPipeline.Testing.ScreenshotCapture` 使用 `System.Windows.Forms.Screen.PrimaryScreen` 与 `Graphics.CopyFromScreen`，把 PNG 保存到 `<out>/screenshots/`。Runner 位于客户机交互式会话，因此只会截取客户机桌面。Runner 启动前会调用 `WindowHider` 隐藏客户机桌面上残留的控制台窗口，避免 `SSHC start` 留下的命令提示符污染截图与录像。
 
 限制：
 

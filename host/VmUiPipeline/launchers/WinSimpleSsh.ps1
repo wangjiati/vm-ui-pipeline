@@ -69,8 +69,17 @@ function Invoke-VmSshExec {
         $Command
     )
 
-    & $Launcher.SshcPath @arguments 2>$null | Out-Null
-    return $LASTEXITCODE
+    # SSHC 会把“认证成功”写到 stderr；在 Stop 模式下 PowerShell 5.1 会把它
+    # 当成终止错误。这里局部放宽，避免把成功提示误判为失败。
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Launcher.SshcPath @arguments 2>$null | Out-Null
+        return $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previous
+    }
 }
 
 function Start-VmSshProcess {
@@ -90,8 +99,16 @@ function Start-VmSshProcess {
         $Program
     )
 
-    & $Launcher.SshcPath @arguments 2>$null | Out-Null
-    $exitCode = $LASTEXITCODE
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Launcher.SshcPath @arguments 2>$null | Out-Null
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previous
+    }
+
     if ($exitCode -ne 0) {
         throw "SSHC start failed with exit code $exitCode for '$Program'."
     }

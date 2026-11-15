@@ -1,6 +1,6 @@
 ﻿@{
     RootModule        = 'VmUiPipeline.psm1'
-    ModuleVersion     = '0.1.2'
+    ModuleVersion     = '0.1.3'
     CompatiblePSEditions = @('Desktop', 'Core')
     GUID              = '29410136-c239-46d0-8892-0d56597ebc5e'
     Author            = 'VmUiPipeline 贡献者'
