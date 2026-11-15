@@ -183,6 +183,9 @@ internal static class Program
                 app = null;
             }
 
+            // Finalize the MP4 before summary.json becomes visible to the host.
+            recorder?.Stop();
+
             if (Interlocked.Exchange(ref _completed, 1) != 0)
             {
                 return 3;
@@ -204,6 +207,7 @@ internal static class Program
         {
             error = exception.ToString();
             log.Write($"ERROR {exception}");
+            recorder?.Stop();
             if (Interlocked.Exchange(ref _completed, 1) == 0)
             {
                 WriteReport(options.OutputDirectory, runId, machine, appInfo, startedUtc, [], error, options.RecordPath);

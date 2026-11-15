@@ -36,6 +36,15 @@ Report it; do not fall back to the host.
 | `5` | Access denied | Use a guest local administrator and enable admin shares. |
 | `67` | Share missing | Use `c$` or fix `vms[].shareName`. |
 
+For a workgroup VM, remote admin access also needs the local account token policy:
+
+```powershell
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
+  /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
+```
+
+Reboot the guest after setting it.
+
 Test from the host:
 
 ```powershell

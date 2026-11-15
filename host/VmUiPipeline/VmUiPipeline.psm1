@@ -208,7 +208,7 @@ function Import-VmUiPipelineConfig {
 
         $user = [string]$vm.user
         if ([string]::IsNullOrWhiteSpace($user)) {
-            $user = $env:USERNAME
+            throw "vms[].user is required for '$name'."
         }
 
         $passwordEnv = [string]$vm.passwordEnv
@@ -805,11 +805,19 @@ function New-VmRunResult {
 
     $tests = @()
     foreach ($test in @($Summary.tests)) {
+        $screenshots = @()
+        foreach ($screenshot in @($test.screenshots)) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$screenshot)) {
+                $screenshots += Join-Path (Join-Path $ResultsPath 'screenshots') (Split-Path -Leaf ([string]$screenshot))
+            }
+        }
+
         $tests += [pscustomobject]@{
-            name       = [string]$test.name
-            status     = [string]$test.status
-            durationMs = [double]$test.durationMs
-            detail     = [string]$test.detail
+            name        = [string]$test.name
+            status      = [string]$test.status
+            durationMs  = [double]$test.durationMs
+            detail      = [string]$test.detail
+            screenshots = $screenshots
         }
     }
 
@@ -943,6 +951,10 @@ function Restore-VmSnapshot {
 
     Write-Host "    reverting snapshot '$($Vm.Snapshot)'"
     & $Config.Launcher.VmrunPath -T ws stop $Vm.Vmx soft 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        & $Config.Launcher.VmrunPath -T ws stop $Vm.Vmx hard 2>$null | Out-Null
+    }
+
     & $Config.Launcher.VmrunPath -T ws revertToSnapshot $Vm.Vmx $Vm.Snapshot | Out-Null
     if ($LASTEXITCODE -ne 0) {
         throw "vmrun revertToSnapshot failed with exit code $LASTEXITCODE."

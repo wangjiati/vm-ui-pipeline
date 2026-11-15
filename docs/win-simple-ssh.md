@@ -50,6 +50,17 @@ the same user and password so the client can authenticate.
 
 ## Bootstrap performed by the orchestrator
 
+For a workgroup VM, remote SMB admin access and WMI process creation need the local
+administrator token policy:
+
+```powershell
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
+  /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
+```
+
+Run that once in the guest, then reboot. Domain-joined VMs with a domain admin do not
+need it.
+
 On the first run for a VM (when the port is closed), `Initialize-VmSshService`:
 
 1. copies `SSHServer.exe` to `\\<vm>\c$\VmUiPipeline\ssh\SSHServer.exe`;

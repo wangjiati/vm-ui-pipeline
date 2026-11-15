@@ -255,7 +255,7 @@ docs/                       architecture, configuration, dependency, security
 
 ## Status
 
-v0.1.0 is a source release. The solution builds, the C# unit tests and the
+v0.1.1 is a source release. The solution builds, the C# unit tests and the
 orchestrator Pester tests pass, and the VM workflow is implemented. The end-to-end VM
 run has **not** been verified in the environment where this project was extracted:
 `vmrun` could not start the test VMs there, and host-side UI testing is intentionally

@@ -99,7 +99,7 @@ Recording is best-effort: a missing ffmpeg logs a warning and the tests still ru
 | --- | --- | --- | --- |
 | `name` | string | required | Stable identifier used in results. |
 | `address` | string | required | IPv4 address or host name reachable from the host. |
-| `user` | string | current host user | Guest local administrator for SMB/WMI. |
+| `user` | string | required | Guest local administrator for SMB/WMI. |
 | `passwordEnv` | string | `VM_<NAME>_PASSWORD` | Environment variable holding the password. |
 | `shareName` | string | `c$` | Admin share. |
 | `vmx` | string | empty | VMX path for `-RevertSnapshots`. |
