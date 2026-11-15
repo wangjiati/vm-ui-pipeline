@@ -6,7 +6,7 @@
 构建包含源码、Runner 与示例的发布 ZIP。
 #>
 param(
-    [string]$Version = '0.1.3',
+    [string]$Version = '0.1.4',
     [string]$OutputDirectory = 'artifacts\release'
 )
 

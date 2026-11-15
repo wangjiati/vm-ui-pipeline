@@ -7,7 +7,7 @@
     <Company>VmUiPipeline contributors</Company>
     <Product>VM UI Pipeline</Product>
     <Copyright>Copyright (c) Files Community and VmUiPipeline contributors</Copyright>
-    <Version>0.1.3</Version>
+    <Version>0.1.4</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>

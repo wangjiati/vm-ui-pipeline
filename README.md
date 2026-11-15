@@ -44,6 +44,7 @@ Windows 服务与 CI Agent 默认运行在 **session 0**，没有交互式桌面
 - 运行前回滚 VMware 快照，然后以无界面方式启动虚拟机。
 - 通过 WinSimpleSSH 在客户机已登录的控制台会话中启动 Runner。
 - 可复用的 C# UI Automation 测试库（`VmUiPipeline.Testing`）：等待、断言、控件模式、失败截图。
+- 运行前、启动后、每个用例后检测异常弹窗；发现弹窗立即失败并自动截图，避免无人值守时被静默阻塞。
 - 可选的 MP4 录屏：客户机内 ffmpeg `gdigrab`，不碰宿主机。
 - 机器可读结果、供 CI 使用的 JUnit XML、Markdown 报告。
 - 多 VM 聚合，逐 VM 统计通过/失败，退出码明确。
@@ -68,6 +69,14 @@ $env:VM_WIN11_PASSWORD = '<客户机密码>'
 ```
 
 完整说明与结果目录见 [docs/demos.md](docs/demos.md)。
+
+## 异常弹窗检测
+
+Runner 会在启动应用前、主窗口出现后、每个用例结束、运行结束时检查客户机桌面上的 `#32770` 对话框。发现弹窗会立即截图并失败，不会让模态窗口静默挡住后续操作。
+
+![Win10 异常弹窗](docs/assets/demos/win10-startup-error.png)
+
+上面是 Win10 测试 VM 中真实捕获的 `Files - Startup Error`（`instance.lock` 被其他 Files 实例占用）。检测到它时流水线直接停止，结果为 `0 通过 / 1 失败`，并留下 `existing-dialog.png`。详情见 [docs/demos.md](docs/demos.md)。
 
 ## 环境要求
 
@@ -244,7 +253,7 @@ docs/                       架构、配置、依赖、安全与排障
 
 ## 当前状态
 
-v0.1.3 为源码版本：解决方案可构建，C# 单元测试与编排层 Pester 测试通过，截图与录屏演示已在 Windows 11 测试虚拟机中真实跑通。**Files 筛选用例尚未做 VM 端到端验证**；请先在你自己的 VM 矩阵上跑通再依赖它，失败与验证模型见 [docs/architecture.md](docs/architecture.md)。
+v0.1.4 为源码版本：解决方案可构建，C# 单元测试与编排层 Pester 测试通过，截图与录屏演示已在 Windows 11 测试虚拟机中真实跑通；异常弹窗检测已在 Windows 10 测试虚拟机中验证（捕获 `Files - Startup Error`）。**Files 筛选用例尚未完成干净的 VM 端到端验证**；请先在你自己的 VM 矩阵上跑通再依赖它，失败与验证模型见 [docs/architecture.md](docs/architecture.md)。
 
 ## 许可证
 

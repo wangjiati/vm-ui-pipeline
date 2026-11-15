@@ -287,10 +287,11 @@ function Import-VmUiPipelineConfig {
         }
         Runner                = [pscustomobject]@{ Path = $runnerPath }
         Suite                 = [pscustomobject]@{
-            Assembly   = $suiteAssembly
-            Type       = [string]$raw.suite.type
-            Folder     = $suiteFolder
-            Parameters = $suiteParameters
+            Assembly      = $suiteAssembly
+            Type          = [string]$raw.suite.type
+            Folder        = $suiteFolder
+            Parameters    = $suiteParameters
+            IgnoreDialogs = [bool]$raw.suite.ignoreDialogs
         }
         Fixtures              = $fixtures
         Launcher              = $launcher
@@ -514,6 +515,10 @@ function Invoke-RemoteVmRun {
 
         if ($Config.Suite.Folder) {
             $runnerArguments += @('--folder', $Config.Suite.Folder)
+        }
+
+        if ($Config.Suite.IgnoreDialogs) {
+            $runnerArguments += '--ignore-dialogs'
         }
 
         if ($Config.Recording.Enabled) {

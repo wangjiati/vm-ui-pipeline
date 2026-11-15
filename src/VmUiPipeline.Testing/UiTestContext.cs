@@ -19,6 +19,7 @@ public sealed class UiTestContext
     private readonly string? _filter;
     private readonly string? _screenshotDirectory;
     private readonly bool _screenshotsEnabled;
+    private readonly bool _detectDialogs;
 
     public UiTestContext(
         UiApplication? app,
@@ -27,7 +28,8 @@ public sealed class UiTestContext
         string? filter,
         Action<string> log,
         string? screenshotDirectory = null,
-        bool screenshotsEnabled = true)
+        bool screenshotsEnabled = true,
+        bool detectDialogs = false)
     {
         App = app;
         Folder = folder;
@@ -36,6 +38,7 @@ public sealed class UiTestContext
         _log = log;
         _screenshotDirectory = screenshotDirectory;
         _screenshotsEnabled = screenshotsEnabled;
+        _detectDialogs = detectDialogs;
     }
 
     public UiApplication? App { get; }
@@ -72,6 +75,17 @@ public sealed class UiTestContext
         {
             body();
             stopwatch.Stop();
+
+            var dialogs = FindDialogs();
+            if (dialogs.Count > 0)
+            {
+                var screenshots = TryCaptureScreenshot($"dialog-{name}");
+                var detail = DescribeDialogs(dialogs);
+                Record(new TestOutcome(name, TestStatus.Failed, Round(stopwatch), detail, screenshots));
+                _log($"FAIL {name}: {detail}");
+                return;
+            }
+
             Record(new TestOutcome(name, TestStatus.Passed, Round(stopwatch), "ok"));
             _log($"PASS {name} ({Round(stopwatch):0} ms)");
         }
@@ -84,10 +98,17 @@ public sealed class UiTestContext
         catch (Exception exception)
         {
             stopwatch.Stop();
+            var dialogs = FindDialogs();
+            var detail = Describe(exception);
+            if (dialogs.Count > 0)
+            {
+                detail += "；" + DescribeDialogs(dialogs);
+            }
+
             var screenshots = TryCaptureScreenshot($"failure-{name}");
             var screenshotNote = screenshots is null ? string.Empty : $" (screenshot: {string.Join(", ", screenshots)})";
-            Record(new TestOutcome(name, TestStatus.Failed, Round(stopwatch), Describe(exception), screenshots));
-            _log($"FAIL {name}: {exception.Message}{screenshotNote}");
+            Record(new TestOutcome(name, TestStatus.Failed, Round(stopwatch), detail, screenshots));
+            _log($"FAIL {name}: {detail}{screenshotNote}");
         }
     }
 
@@ -116,6 +137,10 @@ public sealed class UiTestContext
     }
 
     public void Log(string message) => _log(message);
+
+    /// <summary>返回客户机桌面上当前可见的异常对话框。</summary>
+    public IReadOnlyList<UnexpectedDialog> FindDialogs() =>
+        _detectDialogs ? DialogMonitor.FindVisibleDialogs() : [];
 
     /// <summary>截取客户机桌面并返回 PNG 路径；禁用时返回 null。</summary>
     public string? CaptureScreenshot(string name)
@@ -420,5 +445,12 @@ public sealed class UiTestContext
     {
         var detail = exception.Message;
         return string.IsNullOrWhiteSpace(detail) ? exception.GetType().Name : detail;
+    }
+
+    private static string DescribeDialogs(IReadOnlyList<UnexpectedDialog> dialogs)
+    {
+        var parts = dialogs.Select(dialog =>
+            $"{dialog.Title} [{dialog.ProcessName ?? "unknown"}:{dialog.ProcessId}]");
+        return "检测到异常弹窗：" + string.Join(" | ", parts);
     }
 }

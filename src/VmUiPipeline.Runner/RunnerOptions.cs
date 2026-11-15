@@ -19,6 +19,7 @@ public sealed class RunnerOptions
     public string FfmpegPath { get; private set; } = "ffmpeg.exe";
     public int RecordFps { get; private set; } = 10;
     public bool NoScreenshots { get; private set; }
+    public bool IgnoreDialogs { get; private set; }
     public int TimeoutSeconds { get; private set; } = 600;
     public int StartupTimeoutSeconds { get; private set; } = 60;
     public Dictionary<string, string> Parameters { get; } = new(StringComparer.OrdinalIgnoreCase);
@@ -73,6 +74,9 @@ public sealed class RunnerOptions
                     break;
                 case "--no-screenshots":
                     options.NoScreenshots = true;
+                    break;
+                case "--ignore-dialogs":
+                    options.IgnoreDialogs = true;
                     break;
                 case "--timeout":
                     options.TimeoutSeconds = RequirePositiveInt(args, ref index);
@@ -151,7 +155,7 @@ public sealed class RunnerOptions
                                   [--filter <regex>] [--param key=value ...]
                                   [--timeout <seconds>] [--startup-timeout <seconds>]
                                   [--record <mp4>] [--ffmpeg <path>] [--record-fps <n>]
-                                  [--no-screenshots]
+                                  [--no-screenshots] [--ignore-dialogs]
                                   [--app-sha256 <hex>] [--process-name <name>]
                                   [--run-id <id>] [--help]
 

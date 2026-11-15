@@ -164,6 +164,24 @@ public sealed class SampleSuite : IUiTestSuite
 
 通过向 stdin 写入 `q` 优雅停止，确保 MP4 尾部元数据写入；15 秒内未退出则强制结束。录屏是尽力而为的能力：ffmpeg 缺失只会记录原因，测试继续执行。`-t` 上限用于防止 Runner 被强杀后留下孤儿编码进程。
 
+## 异常弹窗检测
+
+Runner 在四个时机检查客户机桌面上可见的 `#32770` 对话框：
+
+1. 启动应用前（`00-baseline.png` 之后）；
+2. 应用主窗口出现后；
+3. 每个测试通过后；
+4. 套件结束后（`99-final.png` 之后）。
+
+发现弹窗时：
+
+- 立即截图（`existing-dialog` / `dialog-<test>` / `final-dialog`）；
+- 记录弹窗标题、进程名与 PID；
+- 以失败结束，Runner 退出码 `5`；
+- 不自动关闭弹窗，保留现场。
+
+这可以防止 `Files - Startup Error`、实例锁冲突、许可证提示、系统错误框等模态窗口在无人值守时静默阻塞测试。确实需要保留对话框的测试可以给 Runner 加 `--ignore-dialogs`。
+
 ## 失败处理
 
 | 失败场景 | 结果 |
@@ -176,6 +194,7 @@ public sealed class SampleSuite : IUiTestSuite
 | 套件抛异常 | Runner 级错误，退出码 1；报告包含 `error` |
 | 超时 | 退出码 3；`timeout` 截图；停止录屏 |
 | 应用哈希不匹配 | 退出码 4；不执行测试 |
+| 检测到异常弹窗 | 退出码 5；自动截图；不执行测试或终止当前运行 |
 
 聚合退出码：任一 VM 超时为 `3`；否则任一失败为 `1`；否则为 `0`。
 

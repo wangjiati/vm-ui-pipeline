@@ -118,6 +118,29 @@ internal static class Program
         var hiddenWindows = WindowHider.HideConsoleWindows();
         log.Write($"隐藏客户机控制台窗口：{hiddenWindows} 个");
 
+        var baselineScreenshot = TryCaptureScreenshot(options, "00-baseline");
+        if (baselineScreenshot is not null)
+        {
+            log.Write($"基线截图：{baselineScreenshot}");
+        }
+
+        if (!options.IgnoreDialogs)
+        {
+            var existingDialogs = DialogMonitor.FindVisibleDialogs();
+            if (existingDialogs.Count > 0)
+            {
+                return FailFastWithDialogs(
+                    options,
+                    log,
+                    runId,
+                    machine,
+                    appInfo,
+                    startedUtc,
+                    existingDialogs,
+                    "运行前检测到异常弹窗");
+            }
+        }
+
         ScreenRecorder? recorder = null;
         if (!string.IsNullOrWhiteSpace(options.RecordPath))
         {
@@ -143,6 +166,27 @@ internal static class Program
                     options.AppArguments,
                     TimeSpan.FromSeconds(options.StartupTimeoutSeconds),
                     options.ProcessName);
+
+                if (!options.IgnoreDialogs)
+                {
+                    var launchDialogs = DialogMonitor.FindVisibleDialogs();
+                    if (launchDialogs.Count > 0)
+                    {
+                        recorder?.Stop();
+                        var exitCode = FailFastWithDialogs(
+                            options,
+                            log,
+                            runId,
+                            machine,
+                            appInfo,
+                            startedUtc,
+                            launchDialogs,
+                            "启动应用后检测到异常弹窗");
+                        app.Dispose();
+                        app = null;
+                        return exitCode;
+                    }
+                }
             }
 
             using var watchdog = options.TimeoutSeconds > 0
@@ -169,7 +213,8 @@ internal static class Program
                 options.Filter,
                 log.Write,
                 Path.Combine(options.OutputDirectory, "screenshots"),
-                !options.NoScreenshots);
+                !options.NoScreenshots,
+                !options.IgnoreDialogs);
 
             try
             {
@@ -194,12 +239,36 @@ internal static class Program
                 return 3;
             }
 
+            var results = context.Results.ToList();
+            var finalScreenshot = TryCaptureScreenshot(options, "99-final");
+            if (finalScreenshot is not null)
+            {
+                log.Write($"结束截图：{finalScreenshot}");
+            }
+
+            if (!options.IgnoreDialogs)
+            {
+                var finalDialogs = DialogMonitor.FindVisibleDialogs();
+                if (finalDialogs.Count > 0 && !results.Any(test => test.Status == TestStatus.Failed))
+                {
+                    var detail = DescribeDialogs(finalDialogs, "运行结束时检测到异常弹窗");
+                    var screenshot = TryCaptureScreenshot(options, "final-dialog");
+                    results.Add(new TestOutcome(
+                        "popup",
+                        TestStatus.Failed,
+                        0,
+                        screenshot is null ? detail : $"{detail}；截图：{screenshot}",
+                        screenshot is null ? null : new[] { screenshot }));
+                    error ??= detail;
+                }
+            }
+
             var report = TestReport.Create(
                 runId,
                 machine,
                 appInfo,
                 startedUtc,
-                context.Results,
+                results,
                 error,
                 options.RecordPath);
             WriteReport(options.OutputDirectory, report);
@@ -222,6 +291,69 @@ internal static class Program
         {
             app?.Dispose();
             recorder?.Dispose();
+        }
+    }
+
+    private static int FailFastWithDialogs(
+        RunnerOptions options,
+        RunnerLog log,
+        string runId,
+        MachineInfo machine,
+        AppInfo appInfo,
+        DateTimeOffset startedUtc,
+        IReadOnlyList<UnexpectedDialog> dialogs,
+        string prefix)
+    {
+        var detail = DescribeDialogs(dialogs, prefix);
+        var screenshot = TryCaptureScreenshot(options, "existing-dialog");
+        if (screenshot is not null)
+        {
+            detail += $"；截图：{screenshot}";
+        }
+
+        log.Write($"ERROR {detail}");
+        var outcome = new TestOutcome(
+            "pipeline",
+            TestStatus.Failed,
+            0,
+            detail,
+            screenshot is null ? null : new[] { screenshot });
+        WriteReport(
+            options.OutputDirectory,
+            runId,
+            machine,
+            appInfo,
+            startedUtc,
+            new[] { outcome },
+            detail,
+            options.RecordPath);
+        return 5;
+    }
+
+    private static string DescribeDialogs(IReadOnlyList<UnexpectedDialog> dialogs, string prefix = "检测到异常弹窗")
+    {
+        var parts = dialogs.Select(dialog =>
+            $"{dialog.Title} [{dialog.ProcessName ?? "unknown"}:{dialog.ProcessId}]");
+        return $"{prefix}：" + string.Join(" | ", parts);
+    }
+
+    private static string? TryCaptureScreenshot(RunnerOptions options, string name)
+    {
+        if (options.NoScreenshots)
+        {
+            return null;
+        }
+
+        try
+        {
+            return ScreenshotCapture.Capture(
+                Path.Combine(options.OutputDirectory, "screenshots"),
+                name);
+        }
+        catch (Exception exception)
+        {
+            _log?.Write($"截图失败：{exception.Message}");
+            return null;
         }
     }
 

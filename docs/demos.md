@@ -23,6 +23,28 @@
 
 > 为了让录屏干净，Runner 启动前会隐藏客户机桌面上残留的控制台窗口；`run.cmd` 也通过 `wscript.exe` 以隐藏窗口运行。
 
+## 异常弹窗检测演示
+
+Win10 测试 VM 上曾经残留一个 `Files - Startup Error` 弹窗，原因是 `C:\Test\app\Data\instance.lock` 被另一个 Files 实例占用。它属于模态窗口，会挡住 Files 的 UI 操作。
+
+现在流水线会在启动应用前检测 `#32770` 对话框。用 Win10 配置运行：
+
+```powershell
+$env:VM_WIN10_PASSWORD = '<win10 密码>'
+.\vm-ui-pipeline.ps1 -Config .\demos\screenshot.win10.pipeline.json
+```
+
+检测结果：
+
+```text
+FAIL pipeline :: 运行前检测到异常弹窗：Files - Startup Error [Files:5404]
+result: completed（0 通过，1 失败）
+```
+
+![Win10 异常弹窗](assets/demos/win10-startup-error.png)
+
+截图会保存在结果目录的 `win10/screenshots/*-existing-dialog.png`。这次运行没有启动被测应用，因此弹窗不可能干扰测试；如果没有检测，它会被当作正常桌面继续执行。
+
 ## 运行
 
 ```powershell

@@ -40,6 +40,7 @@
         "assembly": { "type": "string", "description": "实现 IUiTestSuite 的测试套件程序集。" },
         "type": { "type": "string", "description": "IUiTestSuite 实现的完整类型名。" },
         "folder": { "type": "string", "description": "作为 --folder 传给套件的目录；VM 运行时必须是客户机路径。" },
+        "ignoreDialogs": { "type": "boolean", "default": false, "description": "忽略异常弹窗检测，适用于确实需要保留对话框的测试。" },
         "parameters": {
           "type": "object",
           "additionalProperties": { "type": ["string", "number", "boolean"] },

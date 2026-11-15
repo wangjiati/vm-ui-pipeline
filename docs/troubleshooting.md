@@ -70,6 +70,26 @@ external\WinSimpleSSH\src\SSHClient\bin\Release\net452\SSHC.exe exec 192.168.221
 - Runner 被杀毒软件或 Windows Defender 拦截。
 - 进程实际运行在 session 0（启动器没有使用交互式会话）。
 
+## 运行前失败：检测到异常弹窗
+
+Runner 会在运行前、启动后、每个用例后检查 `#32770` 对话框。典型输出：
+
+```text
+运行前检测到异常弹窗：Files - Startup Error [Files:5404]；截图：...\existing-dialog.png
+```
+
+处理：
+
+1. 打开截图确认弹窗内容；
+2. 关闭弹窗或结束对应进程，例如 Files 的实例锁冲突：
+   ```powershell
+   Get-Process Files -ErrorAction SilentlyContinue | Stop-Process -Force
+   ```
+3. 清理对应测试数据目录下的 `Data\instance.lock`（旧 Files 流水线为 `C:\Test\app\Data\instance.lock`）；
+4. 重新运行。
+
+如果测试本身需要保留对话框，给 Runner 传 `--ignore-dialogs`，但这样会失去无人值守保护。
+
 ## 截图全黑或缺失
 
 - 客户机已锁定，或会话已断开。保持登录。

@@ -50,6 +50,7 @@ dotnet publish src/VmUiPipeline.Runner -c Release -r win-x64 --self-contained tr
 | `assembly` | 字符串 | 套件程序集路径。会投放其整个目录。 |
 | `type` | 字符串 | `IUiTestSuite` 实现的完整类型名。 |
 | `folder` | 字符串 | 作为 `--folder` 传入。VM 运行时必须是**客户机**路径。 |
+| `ignoreDialogs` | 布尔 | 忽略异常弹窗检测，默认 `false`。仅用于确实需要保留对话框的测试。 |
 | `parameters` | 对象 | 额外的 `--param key=value`，通过 `context.Parameters` 读取。 |
 
 示例：`"type": "FilesFilterTests.FilesFilterSuite"`，`"folder": "C:\\FilterTest"`。
