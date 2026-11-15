@@ -10,8 +10,7 @@ using System.Windows.Forms;
 namespace VmUiPipeline.Testing;
 
 /// <summary>
-/// Captures the guest desktop. The runner lives in the VM's interactive session, so
-/// this never touches the host's desktop.
+/// 截取客户机桌面。Runner 位于虚拟机交互式会话中，因此不会接触宿主机桌面。
 /// </summary>
 public static class ScreenshotCapture
 {

@@ -8,8 +8,8 @@ using VmUiPipeline.Testing;
 namespace SampleTests;
 
 /// <summary>
-/// End-to-end smoke suite for <c>samples/SampleApp</c>. It exercises launch, UIA lookup,
-/// text input, commands, toggles, count assertions, and the skip path.
+/// <c>samples/SampleApp</c> 的端到端冒烟套件，覆盖启动、UIA 查找、文本输入、
+/// 命令、开关、计数断言与跳过路径。
 /// </summary>
 public sealed class SampleSuite : IUiTestSuite
 {

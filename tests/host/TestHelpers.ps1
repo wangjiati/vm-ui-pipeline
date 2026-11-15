@@ -1,4 +1,4 @@
-# Copyright (c) Files Community and VmUiPipeline contributors.
+﻿# Copyright (c) Files Community and VmUiPipeline contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 Import-Module (Join-Path $PSScriptRoot '..\..\host\VmUiPipeline\VmUiPipeline.psd1') -Force

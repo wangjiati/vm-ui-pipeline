@@ -1,14 +1,13 @@
-# Copyright (c) Files Community and VmUiPipeline contributors.
+﻿# Copyright (c) Files Community and VmUiPipeline contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 <#
-WinSimpleSSH launcher adapter.
+WinSimpleSSH 启动适配器。
 
-Dependency contract: WinSimpleSSH is used only to start the run.cmd in the guest's
-logged-on interactive console session. Its service runs as LocalSystem and calls
-WTSQueryUserToken + CreateProcessAsUser with lpDesktop = "WinSta0\Default".
-Nothing else in the pipeline depends on it: files move over SMB, results are JSON
-written by VmUiPipeline.Runner, and pass/fail is decided by the runner.
+依赖契约：WinSimpleSSH 只用于在客户机已登录交互式控制台会话中启动 run.cmd。
+其服务以 LocalSystem 运行，调用 WTSQueryUserToken + CreateProcessAsUser，
+并设置 lpDesktop = "WinSta0\Default"。流水线中其他部分都不依赖它：文件走 SMB，
+结果由 VmUiPipeline.Runner 写成 JSON，通过/失败由 Runner 判定。
 #>
 
 function Initialize-VmSshService {

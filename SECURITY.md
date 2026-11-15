@@ -1,41 +1,38 @@
-# Security policy
+# 安全策略
 
-## Supported versions
+## 支持版本
 
-| Version | Supported |
+| 版本 | 支持 |
 | --- | --- |
-| 0.1.x | Yes |
+| 0.1.x | 是 |
 
-## Reporting a vulnerability
+## 报告漏洞
 
-Do not open a public issue. Use GitHub's private vulnerability reporting:
-<https://github.com/wangjiati/vm-ui-pipeline/security/advisories/new>.
+不要开公开 issue。请使用 GitHub 私有漏洞报告：
+<https://github.com/wangjiati/vm-ui-pipeline/security/advisories/new>。
 
-Include:
+请包含：
 
-- the affected component (host module, runner, harness, docs);
-- reproduction steps and the configuration shape (redact passwords);
-- impact, especially if it allows escaping the guest, executing on the host, or
-  disclosing credentials;
-- any suggested fix.
+- 受影响组件（宿主机模块、Runner、测试库、文档）；
+- 复现步骤与配置结构（隐藏密码）；
+- 影响，尤其是能否逃逸客户机、在宿主机执行或泄露凭据；
+- 建议的修复方式。
 
-You will get an acknowledgement as soon as possible. Please allow time for a fix and
-a coordinated disclosure.
+会尽快确认。请给修复与协调披露留出时间。
 
-## Scope
+## 范围
 
-In scope:
+在范围内：
 
-- Host-side command injection through configuration or guest-controlled files.
-- Credential disclosure in logs, results, or errors.
-- Guest-to-host escape or unintended host UI interaction.
-- Path traversal in staging, fixtures, or result collection.
-- Weak defaults that expose WinSimpleSSH beyond the test network.
+- 通过配置或客户机可控文件造成的宿主机命令注入。
+- 日志、结果或错误中的凭据泄露。
+- 客户机到宿主机的逃逸，或意外的宿主机 UI 交互。
+- 投放、夹具或结果回收中的路径穿越。
+- 把 WinSimpleSSH 暴露到测试网络之外的弱默认配置。
 
-Out of scope:
+不在范围内：
 
-- Vulnerabilities in WinSimpleSSH upstream (report them to that project).
-- Vulnerabilities in VMware, Windows, or ffmpeg.
-- The inherent risk of running a LocalSystem remote-launch service on an untrusted
-  network; use an isolated lab network.
-- Denial of service against your own test VM.
+- WinSimpleSSH 上游漏洞（请报告给该项目）。
+- VMware、Windows 或 ffmpeg 的漏洞。
+- 在不可信网络上运行 LocalSystem 远程启动服务本身的风险；请使用隔离实验网络。
+- 针对你自己测试虚拟机的拒绝服务。

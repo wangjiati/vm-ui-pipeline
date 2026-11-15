@@ -4,8 +4,7 @@
 namespace VmUiPipeline.Testing;
 
 /// <summary>
-/// A suite of UI tests. Implementations are instantiated by the runner and run once
-/// inside the guest's interactive desktop session.
+/// UI 测试套件。Runner 实例化实现类，并在客户机交互式桌面会话中执行一次。
 /// </summary>
 public interface IUiTestSuite
 {

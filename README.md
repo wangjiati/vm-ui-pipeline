@@ -1,84 +1,74 @@
 # VM UI Pipeline
 
-Run Windows desktop UI automation tests inside real virtual machines — completely
-decoupled from the machine you work on.
+在真实虚拟机里运行 Windows 桌面 UI 自动化测试，与你的工作机彻底解耦。
 
 [![CI](https://github.com/wangjiati/vm-ui-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/wangjiati/vm-ui-pipeline/actions/workflows/ci.yml)
 [![License: MPL-2.0](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512bd4.svg)](https://dotnet.microsoft.com/)
 [![PowerShell 5.1+](https://img.shields.io/badge/PowerShell-5.1%2B-5391fe.svg)](https://learn.microsoft.com/powershell/)
 
-The host orchestrates. The VM does the work. Your desktop stays usable.
+宿主机只做编排，真正的工作都在虚拟机里完成；测试期间宿主机可以继续正常使用。
 
 ```text
-┌──────────────────────── host (no UI automation) ────────────────────────┐
-│ PowerShell orchestrator                                                 │
-│   • expands the artifact and verifies SHA-256                           │
-│   • stages app / runner / suite / fixtures over SMB ──────────┐         │
-│   • starts run.cmd through WinSimpleSSH ──────────────────┐   │         │
-│   • collects JSON, JUnit XML, screenshots, MP4 ◄──────────┼───┼─────┐   │
-└───────────────────────────────────────────────────────────┼───┼─────┼───┘
-                                                            │   │     │
-┌──────────────────────── VM (interactive desktop) ─────────▼───▼─────┼───┐
-│  C:\VmUiPipeline\run.cmd                                            │   │
-│    └─ VmUiPipeline.Runner                                           │   │
-│         ├─ launches the application under test                      │   │
-│         ├─ drives it with UI Automation                             │   │
-│         ├─ writes summary.json / run.log                            │   │
-│         ├─ captures PNG screenshots on failure                      │   │
-│         └─ optionally records session.mp4 with ffmpeg               │   │
-└─────────────────────────────────────────────────────────────────────┴───┘
+┌──────────────────── 宿主机（不执行 UI 自动化）────────────────────┐
+│ PowerShell 编排器                                                 │
+│   • 展开产物并校验 SHA-256                                        │
+│   • 通过 SMB 投放应用、Runner、套件与夹具 ───────────────────┐    │
+│   • 通过 WinSimpleSSH 启动 run.cmd ──────────────────────┐    │    │
+│   • 回收 JSON、JUnit、截图、MP4 ◄───────────────────────┼────┼────┘
+└─────────────────────────────────────────────────────────┼────┼─────┘
+                                                          │    │
+┌──────────────────── 虚拟机（交互式桌面）────────────────▼────▼─────┐
+│  C:\VmUiPipeline\run.cmd                                          │
+│    └─ VmUiPipeline.Runner                                         │
+│         ├─ 启动被测应用                                           │
+│         ├─ 通过 UI Automation 驱动应用                            │
+│         ├─ 写入 summary.json / run.log                            │
+│         ├─ 失败时保存 PNG 截图                                    │
+│         └─ 可选：用 ffmpeg 录制 session.mp4                       │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-## Why a VM
+## 为什么用虚拟机
 
-Windows services and CI agents run in **session 0**, which has no interactive desktop.
-UI Automation, SendKeys, screenshots, and video capture need a real logged-on desktop.
-A VM gives you that desktop without taking over the host:
+Windows 服务与 CI Agent 默认运行在 **session 0**，没有交互式桌面；而 UI Automation、SendKeys、截图、录屏都需要一个真正登录的桌面。虚拟机正好提供这个桌面，同时不占用宿主机：
 
-- **Fully automated user simulation** — click, type, toggle, select, assert, capture.
-- **No interference** — the app, the mouse, the focus, the screenshots, and the
-  recording all live inside the VM. You can keep working on the host.
-- **A real matrix** — Windows 10 and Windows 11 guests, different DPI and locale
-  settings, snapshotted and reset for each run.
-- **Evidence** — a failure leaves a screenshot and, when enabled, a video.
+- **全自动模拟用户操作**：点击、输入、勾选、选择、断言、截图、录屏。
+- **不干扰宿主机**：被测应用、鼠标、焦点、截图、录屏全部在客户机内；宿主机桌面不被占用。
+- **真实矩阵**：Windows 10/11、不同 DPI 与语言，每次运行前可回滚快照。
+- **可追溯证据**：失败自动留截图；开启后留下 MP4 录像。
 
-## Features
+## 功能
 
-- Stage a portable app (directory or `.zip`) and fixtures over SMB; verify the app
-  hash inside the guest before running it.
-- Revert a VMware snapshot before a run, then start the VM headless.
-- Launch the runner in the guest's logged-on console session via WinSimpleSSH.
-- Reusable C# UI Automation harness (`VmUiPipeline.Testing`) with waits, assertions,
-  control patterns, and per-failure screenshots.
-- Optional MP4 recording through ffmpeg `gdigrab`, all inside the guest.
-- Machine-readable results, JUnit XML for CI, and a Markdown report.
-- Multi-VM aggregation with per-VM pass/fail and clear exit codes.
-- The Files filter acceptance suite is preserved as a sample.
+- 通过 SMB 投放便携应用（目录或 `.zip`）与夹具，并在客户机内校验应用哈希。
+- 运行前回滚 VMware 快照，然后以无界面方式启动虚拟机。
+- 通过 WinSimpleSSH 在客户机已登录的控制台会话中启动 Runner。
+- 可复用的 C# UI Automation 测试库（`VmUiPipeline.Testing`）：等待、断言、控件模式、失败截图。
+- 可选的 MP4 录屏：客户机内 ffmpeg `gdigrab`，不碰宿主机。
+- 机器可读结果、供 CI 使用的 JUnit XML、Markdown 报告。
+- 多 VM 聚合，逐 VM 统计通过/失败，退出码明确。
+- 原 Files 筛选验收套件保留为示例。
 
-## Requirements
+## 环境要求
 
-**Host**
+**宿主机**
 
-- Windows 10/11, PowerShell 5.1 or PowerShell 7.
-- .NET 10 SDK for building the runner and suites (not needed at test time if you use
-  the self-contained runner).
-- VMware Workstation with test VMs, if you use `-RevertSnapshots`.
-- [WinSimpleSSH](https://github.com/wangjiati/WinSimpleSSH) built from source. See
-  [docs/win-simple-ssh.md](docs/win-simple-ssh.md).
+- Windows 10/11，PowerShell 5.1 或 PowerShell 7。
+- 构建 Runner 与套件需要 .NET 10 SDK；使用自包含 Runner 时，测试阶段不需要 SDK。
+- 使用 `-RevertSnapshots` 时需要 VMware Workstation 与测试虚拟机。
+- 需要从源码构建的 [WinSimpleSSH](https://github.com/wangjiati/WinSimpleSSH)，见 [docs/win-simple-ssh.md](docs/win-simple-ssh.md)。
 
-**Guest**
+**客户机**
 
-- Windows 10/11, a logged-on local administrator.
-- SMB admin share reachable (`\\<ip>\c$`) and TCP 445 open.
-- WinSimpleSSH service installed on first use (the orchestrator does this).
-- .NET 10 desktop runtime only if you publish the runner framework-dependent. The
-  documented publish command is self-contained, so normally nothing is needed.
-- Optional: `ffmpeg.exe` on the guest for recording.
+- Windows 10/11，已登录的本地管理员账户。
+- 可访问 SMB 管理共享（`\\<ip>\c$`），TCP 445 开放。
+- 首次使用时由编排器安装 WinSimpleSSH 服务。
+- 仅当以框架依赖方式发布 Runner 时，才需要 .NET 10 桌面运行时；文档中的发布命令是自包含的，正常无需额外安装。
+- 可选：客户机上的 `ffmpeg.exe`，用于录屏。
 
-## Quick start
+## 快速开始
 
-### 1. Build the runner and the sample suite
+### 1. 构建 Runner 与示例套件
 
 ```powershell
 dotnet publish src/VmUiPipeline.Runner -c Release -r win-x64 --self-contained true `
@@ -88,30 +78,24 @@ dotnet publish samples/SampleTests -c Release -o artifacts/suites/SampleTests
 dotnet publish samples/SampleApp -c Release -r win-x64 --self-contained true -o artifacts/app/SampleApp
 ```
 
-### 2. Get WinSimpleSSH
+### 2. 获取 WinSimpleSSH
 
 ```powershell
 ./scripts/Get-WinSimpleSsh.ps1
 ```
 
-The script clones the pinned upstream commit and builds `SSHC.exe` and
-`SSHServer.exe` with MSBuild. The binaries are not redistributed by this project.
+脚本会克隆固定提交并用 MSBuild 构建 `SSHC.exe` 与 `SSHServer.exe`。本项目不分发这两个二进制。
 
-### 3. Prepare a VM
+### 3. 准备虚拟机
 
-- Install Windows 10/11, log in as a local administrator, and keep the desktop
-  unlocked. A locked or logged-off VM has no interactive session to launch into.
-- Confirm `\\<vm-ip>\c$` is reachable from the host.
-- Allow TCP 445 (SMB) and the WinSimpleSSH port (default 22222) through the guest
-  firewall. The orchestrator installs the service on first use.
-- Set the display to a deterministic size (for example 1920×1080, 100% scaling) if
-  you rely on screenshots or recording.
+- 安装 Windows 10/11，以本地管理员登录，并保持桌面解锁。锁定或注销的虚拟机没有可用的交互式会话。
+- 确认宿主机可以访问 `\\<vm-ip>\c$`。
+- 在客户机防火墙中放行 TCP 445（SMB）与 WinSimpleSSH 端口（默认 22222）。编排器会在首次运行时安装服务。
+- 如果依赖截图或录屏，把显示固定为确定的分辨率（例如 1920×1080、100% 缩放）。
 
-### 4. Write `pipeline.json`
+### 4. 编写 `pipeline.json`
 
-Copy [pipeline.sample.json](pipeline.sample.json) for the self-contained sample, or
-[pipeline.example.json](pipeline.example.json) for the Files filter suite. Adjust the
-paths, VM addresses, and credential environment variable names.
+示例应用使用 [pipeline.sample.json](pipeline.sample.json)，Files 筛选套件使用 [pipeline.example.json](pipeline.example.json)。按实际情况修改路径、VM 地址与密码环境变量名。
 
 ```json
 {
@@ -145,46 +129,44 @@ paths, VM addresses, and credential environment variable names.
 }
 ```
 
-### 5. Run
+### 5. 运行
 
 ```powershell
-$env:VM_WIN11_PASSWORD = '<guest local admin password>'
+$env:VM_WIN11_PASSWORD = '<客户机本地管理员密码>'
 powershell -NoProfile -ExecutionPolicy Bypass -File .\vm-ui-pipeline.ps1 `
   -Config .\pipeline.json -Vm win11
 ```
 
-Add `-RevertSnapshots` to reset each VM to its snapshot first. Use `-OutputDirectory`
-to choose where results land.
+加上 `-RevertSnapshots` 可在运行前把每台 VM 回滚到快照。用 `-OutputDirectory` 指定结果目录。
 
-## Results
+## 结果
 
 ```text
 artifacts/results/<runId>/
-├─ pipeline-summary.json     # aggregate, per-VM counts, exit code
-├─ junit.xml                 # for CI test-report ingestion
-├─ report.md                 # human-readable summary
-├─ run.json                  # what was run
+├─ pipeline-summary.json     # 聚合结果、逐 VM 计数、退出码
+├─ junit.xml                 # 供 CI 测试报告消费
+├─ report.md                 # 人类可读摘要
+├─ run.json                  # 本次运行配置
 └─ <vm>/
-   ├─ summary.json           # guest runner output
-   ├─ run.log                # timestamped guest log
-   ├─ results.txt            # PASSED|name|detail lines
-   ├─ console.log            # stdout/stderr of the runner
-   ├─ session.mp4            # when recording is enabled
-   └─ screenshots/*.png      # automatic failure captures
+   ├─ summary.json           # 客户机 Runner 输出
+   ├─ run.log                # 带时间戳的客户机日志
+   ├─ results.txt            # PASSED|name|detail 行
+   ├─ console.log            # Runner 标准输出/错误
+   ├─ session.mp4            # 开启录屏时
+   └─ screenshots/*.png      # 失败自动截图
 ```
 
-Exit codes: `0` all passed, `1` a test or VM failed, `2` configuration or environment
-error, `3` timeout.
+退出码：`0` 全部通过，`1` 用例或 VM 失败，`2` 配置/环境错误，`3` 超时。
 
-## Screenshots and recording
+## 截图与录屏
 
-Screenshots are **on by default** and are taken inside the guest:
+截图默认开启，并且全部在客户机内完成：
 
-- automatically when a test fails;
-- manually with `context.CaptureScreenshot("name")`;
-- on timeout.
+- 测试失败时自动截图；
+- 用例中调用 `context.CaptureScreenshot("name")`；
+- 超时时截图。
 
-Recording is opt-in:
+录屏是可选能力：
 
 ```json
 "recording": {
@@ -194,75 +176,54 @@ Recording is opt-in:
 }
 ```
 
-The runner starts `ffmpeg` with the `gdigrab` desktop input, records
-`C:\VmUiPipeline\results\session.mp4`, and stops it gracefully after the suite. The
-MP4 is copied back with the rest of the results. ffmpeg is not bundled. In a VM,
-10–15 fps is usually enough; recording is evidence, not a frame-accurate benchmark.
+Runner 会在客户机启动 `ffmpeg` 的 `gdigrab` 桌面输入，录制到 `C:\VmUiPipeline\results\session.mp4`，套件结束后优雅停止，MP4 随结果一起回传。ffmpeg 不随项目分发。虚拟机里 10–15 fps 通常足够；录屏是证据，不是帧级性能基准。
 
-## WinSimpleSSH dependency
+## WinSimpleSSH 依赖
 
-WinSimpleSSH is **not a test framework**. It is the transport that starts one process
-in the VM's logged-on desktop session:
+WinSimpleSSH **不是测试框架**，只负责在虚拟机的已登录桌面会话里启动一个进程：
 
 ```powershell
 SSHC start <vm-ip> -u <user> C:\VmUiPipeline\run.cmd
 ```
 
-Its Windows service (`SSHServer.exe`, LocalSystem) calls
-`WTSGetActiveConsoleSessionId`, `WTSQueryUserToken`, and `CreateProcessAsUser` with
-`lpDesktop = "WinSta0\Default"`. That is the only reason it is here. Everything else
-is independent:
+它的 Windows 服务（`SSHServer.exe`，LocalSystem）调用 `WTSGetActiveConsoleSessionId`、`WTSQueryUserToken`、`CreateProcessAsUser`，并把 `lpDesktop` 设为 `WinSta0\Default`。这是引入它的唯一原因。其余职责完全独立：
 
-| Concern | Owner |
+| 关注点 | 负责方 |
 | --- | --- |
-| Move app / runner / suite / fixtures | SMB |
-| Launch in the interactive session | WinSimpleSSH |
-| Launch the app, drive UI, assert | `VmUiPipeline.Runner` + `VmUiPipeline.Testing` |
-| Write results, screenshots, video | `VmUiPipeline.Runner` |
-| Aggregate, JUnit, Markdown, exit code | host PowerShell module |
+| 应用/ Runner / 套件 / 夹具传输 | SMB |
+| 在交互式会话中启动 | WinSimpleSSH |
+| 启动应用、驱动 UI、断言 | `VmUiPipeline.Runner` + `VmUiPipeline.Testing` |
+| 写结果、截图、录屏 | `VmUiPipeline.Runner` |
+| 聚合、JUnit、Markdown、退出码 | 宿主机 PowerShell 模块 |
 
-The upstream project has no license file, so this repository does **not** vendor it
-and release artifacts do not contain it. Build it from the pinned commit with
-`scripts/Get-WinSimpleSsh.ps1`, or point `sshcPath` / `sshServerExe` at your own
-build. See [docs/win-simple-ssh.md](docs/win-simple-ssh.md) for the exact contract,
-bootstrap steps, and failure modes.
+上游没有 LICENSE 文件，因此本项目**不内置**它，发布产物也不包含它。请用 `scripts/Get-WinSimpleSsh.ps1` 从固定提交构建，或把 `sshcPath` / `sshServerExe` 指向你自己的构建。完整契约、安装步骤与失败模式见 [docs/win-simple-ssh.md](docs/win-simple-ssh.md)。
 
-## Security
+## 安全
 
-- Credentials come from environment variables named in `passwordEnv`. They are never
-  written to `pipeline.json`, result files, or logs.
-- Use an isolated host-only or NAT VM network. WinSimpleSSH listens on the VM and
-  authenticates with the configured user; restrict `ipWhitelist` to the host subnet.
-- The SMB mapping uses the guest local administrator. Use a dedicated test VM, not a
-  production machine.
-- The runner verifies the staged application's SHA-256 before launching it.
-- Treat screenshots and recordings as potentially sensitive: they capture the guest
-  desktop.
+- 密码只从 `passwordEnv` 指定的环境变量读取，不写入 `pipeline.json`、结果文件或日志。
+- 使用隔离的 Host-only 或 NAT 虚拟机网络。WinSimpleSSH 在虚拟机内监听并校验配置用户，`ipWhitelist` 应限制到宿主机网段。
+- SMB 使用客户机本地管理员。只对专用测试虚拟机使用，不要用于生产机。
+- Runner 在启动前校验已投放应用的 SHA-256。
+- 截图和录屏可能包含敏感信息，应按敏感产物管理。
 
-## Project layout
+## 项目结构
 
 ```text
-src/VmUiPipeline.Testing/   UI Automation harness and result model
-src/VmUiPipeline.Runner/    guest-side test host (single-file EXE)
-host/VmUiPipeline/          PowerShell orchestrator module
-samples/SampleApp/          self-contained WPF app for smoke tests
-samples/SampleTests/        sample suite (launch, filter, recurse, clear, screenshot)
-samples/FilesFilterTests/   original Files filter acceptance suite
-tests/VmUiPipeline.Tests/   C# unit tests
-tests/host/                 Pester tests for the orchestrator
-docs/                       architecture, configuration, dependency, security
+src/VmUiPipeline.Testing/   UI Automation 测试库与结果模型
+src/VmUiPipeline.Runner/    客户机测试宿主（单文件 EXE）
+host/VmUiPipeline/          PowerShell 编排模块
+samples/SampleApp/          用于冒烟测试的自包含 WPF 应用
+samples/SampleTests/        示例套件（启动、筛选、递归、清除、截图）
+samples/FilesFilterTests/   原 Files 筛选验收套件
+tests/VmUiPipeline.Tests/   C# 单元测试
+tests/host/                 编排层 Pester 测试
+docs/                       架构、配置、依赖、安全与排障
 ```
 
-## Status
+## 当前状态
 
-v0.1.1 is a source release. The solution builds, the C# unit tests and the
-orchestrator Pester tests pass, and the VM workflow is implemented. The end-to-end VM
-run has **not** been verified in the environment where this project was extracted:
-`vmrun` could not start the test VMs there, and host-side UI testing is intentionally
-forbidden. Run it against your own VM matrix before relying on it. See
-[docs/architecture.md](docs/architecture.md) for the failure and verification model.
+v0.1.2 为源码版本：解决方案可构建，C# 单元测试与编排层 Pester 测试通过，VM 流程已实现。**没有在本机环境完成 VM 端到端验证**：该环境的 `vmrun` 无法启动测试虚拟机，且本项目禁止在宿主机执行 UI 测试。请先在你自己的 VM 矩阵上跑通再依赖它；失败与验证模型见 [docs/architecture.md](docs/architecture.md)。
 
-## License
+## 许可证
 
-Mozilla Public License 2.0. The pipeline is derived from the Files project's
-`tools/ui-pipeline`; see [NOTICE](NOTICE).
+Mozilla Public License 2.0。流水线源自 Files 项目的 `tools/ui-pipeline`，见 [NOTICE](NOTICE)。

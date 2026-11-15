@@ -1,17 +1,17 @@
-# Copyright (c) Files Community and VmUiPipeline contributors.
+﻿# Copyright (c) Files Community and VmUiPipeline contributors.
 # SPDX-License-Identifier: MPL-2.0
 #requires -Version 5.1
 
 <#
 .SYNOPSIS
-Runs a VM UI test pipeline described by pipeline.json.
+运行 pipeline.json 描述的 VM UI 测试流水线。
 
 .EXAMPLE
-$env:VM_WIN11_PASSWORD = '<password>'
+$env:VM_WIN11_PASSWORD = '<密码>'
 .\vm-ui-pipeline.ps1 -Config .\pipeline.json -Vm win11
 
 .EXAMPLE
-.\vm-ui-pipeline.ps1 -Config .\samples\local.pipeline.json
+.\vm-ui-pipeline.ps1 -Config .\pipeline.sample.json
 #>
 [CmdletBinding()]
 param(

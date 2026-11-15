@@ -1,9 +1,9 @@
-# Copyright (c) Files Community and VmUiPipeline contributors.
+﻿# Copyright (c) Files Community and VmUiPipeline contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 <#
 .SYNOPSIS
-Clones and builds the pinned WinSimpleSSH dependency.
+克隆并构建固定版本的 WinSimpleSSH 依赖。
 #>
 param(
     [string]$Destination = (Join-Path $PSScriptRoot '..\external\WinSimpleSSH'),

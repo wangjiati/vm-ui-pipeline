@@ -1,12 +1,12 @@
-# Copyright (c) Files Community and VmUiPipeline contributors.
+﻿# Copyright (c) Files Community and VmUiPipeline contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 <#
 .SYNOPSIS
-Builds a source + runner + samples release ZIP.
+构建包含源码、Runner 与示例的发布 ZIP。
 #>
 param(
-    [string]$Version = '0.1.0',
+    [string]$Version = '0.1.2',
     [string]$OutputDirectory = 'artifacts\release'
 )
 
@@ -50,7 +50,6 @@ foreach ($file in @(
     'pipeline.example.json',
     'pipeline.sample.json',
     'README.md',
-    'README.zh-CN.md',
     'CHANGELOG.md',
     'CONTRIBUTING.md',
     'SECURITY.md',

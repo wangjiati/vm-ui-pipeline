@@ -7,8 +7,8 @@ using System.IO;
 namespace VmUiPipeline.Runner;
 
 /// <summary>
-/// Optional session recording. Starts ffmpeg with the gdigrab input inside the guest
-/// session and stops it gracefully so the MP4 trailer is written.
+/// 可选的会话录制。在客户机会话内以 gdigrab 输入启动 ffmpeg，
+/// 并在结束时优雅停止，确保写入 MP4 尾部元数据。
 /// </summary>
 internal sealed class ScreenRecorder : IDisposable
 {
@@ -103,7 +103,7 @@ internal sealed class ScreenRecorder : IDisposable
             }
             catch (Exception)
             {
-                // Process already gone.
+                // 进程已不存在。
             }
         }
     }

@@ -1,20 +1,16 @@
-# Copyright (c) Files Community and VmUiPipeline contributors.
+﻿# Copyright (c) Files Community and VmUiPipeline contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 <#
 .SYNOPSIS
-Runs Windows desktop UI automation tests inside one or more VM interactive sessions.
+在一台或多台虚拟机的交互式会话中运行 Windows 桌面 UI 自动化测试。
 
 .DESCRIPTION
-This module owns the host side of the pipeline: it reads a pipeline.json, stages the
-application, runner, suite, and fixtures over SMB, launches the runner in the guest's
-logged-on desktop session through a launcher backend, and collects JSON results.
+本模块负责流水线宿主机侧：读取 pipeline.json，通过 SMB 投放应用、Runner、套件与夹具，
+经启动器在客户机已登录桌面会话中启动 Runner，并收集 JSON 结果。
 
-The only launcher backend is win-simple-ssh: it starts the runner in the guest's
-logged-on interactive console session. The host never launches the application under
-test and never drives UI on the host.
-
-.PRIVATE
+唯一启动器为 win-simple-ssh：在客户机已登录交互式控制台会话中启动 Runner。
+宿主机从不启动被测应用，也从不驱动宿主机 UI。
 #>
 
 $ErrorActionPreference = 'Stop'

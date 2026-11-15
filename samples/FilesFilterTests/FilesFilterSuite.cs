@@ -9,9 +9,8 @@ using VmUiPipeline.Testing;
 namespace FilesFilterTests;
 
 /// <summary>
-/// The original Files filter acceptance suite, ported onto the reusable harness. It
-/// expects the packed Files app (<c>Files.exe</c>) and a fixture folder containing
-/// two root zips, two text files, and two nested zips.
+/// 原 Files 筛选验收套件，移植到可复用测试库。它需要打包后的 Files 应用
+/// （<c>Files.exe</c>）以及包含两个根级 zip、两个文本文件、两个嵌套 zip 的夹具目录。
 /// </summary>
 public sealed class FilesFilterSuite : IUiTestSuite
 {

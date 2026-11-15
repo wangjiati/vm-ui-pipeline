@@ -1,56 +1,56 @@
-name: Bug report
-description: Report a defect in the host orchestrator, runner, or harness
-title: "[Bug] "
+name: 缺陷报告
+description: 报告宿主机编排器、Runner 或测试库的问题
+title: "[缺陷] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Do not run UI tests on the host to reproduce. Use a VM. This project
-        intentionally rejects host-side UI testing.
+        不要为了复现而在宿主机上运行 UI 测试。请使用虚拟机。
+        本项目明确拒绝宿主机 UI 测试。
   - type: textarea
     id: what
     attributes:
-      label: What happened
-      description: Include the exact command and the observed output.
+      label: 发生了什么
+      description: 请附上完整命令与实际输出。
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: What you expected
+      label: 你期望的结果
     validations:
       required: true
   - type: input
     id: host
     attributes:
-      label: Host environment
-      description: Windows version, PowerShell version, .NET SDK, VMware version.
+      label: 宿主机环境
+      description: Windows 版本、PowerShell 版本、.NET SDK、VMware 版本。
     validations:
       required: true
   - type: input
     id: guest
     attributes:
-      label: Guest environment
-      description: Windows version, session state (logged in / locked), display and DPI.
+      label: 客户机环境
+      description: Windows 版本、会话状态（已登录/已锁定）、分辨率与 DPI。
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
-      label: Logs and results
+      label: 日志与结果
       description: |
-        Paste `pipeline-summary.json`, `junit.xml`, and the relevant `run.log` /
-        `console.log` excerpts. Remove passwords and sensitive paths.
+        粘贴 `pipeline-summary.json`、`junit.xml` 以及相关的 `run.log` /
+        `console.log` 片段。请删除密码与敏感路径。
       render: text
     validations:
       required: false
   - type: checkboxes
     id: confirms
     attributes:
-      label: Confirmations
+      label: 确认
       options:
-        - label: I did not run the UI test on the host.
+        - label: 我没有在宿主机上运行 UI 测试。
           required: true
-        - label: I removed passwords and secrets from the logs.
+        - label: 我已从日志中删除密码与密钥。
           required: true

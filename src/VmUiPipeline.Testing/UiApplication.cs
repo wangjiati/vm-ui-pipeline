@@ -9,7 +9,7 @@ using System.Windows.Automation;
 namespace VmUiPipeline.Testing;
 
 /// <summary>
-/// A launched desktop application plus its UI Automation root window.
+/// 已启动的桌面应用及其 UI Automation 根窗口。
 /// </summary>
 public sealed class UiApplication : IDisposable
 {
@@ -67,7 +67,7 @@ public sealed class UiApplication : IDisposable
         return application;
     }
 
-    /// <summary>Moves the main window to a deterministic size and brings it to the foreground.</summary>
+    /// <summary>把主窗口调整到确定的大小并置于前台。</summary>
     public void Focus(int width = 1600, int height = 1000)
     {
         var handle = new IntPtr(MainWindow.Current.NativeWindowHandle);
@@ -161,8 +161,8 @@ public sealed class UiApplication : IDisposable
                 return null;
             }
 
-            // A launcher may hand off to a different process; scan occasionally, not
-            // on every poll, so a slow process enumeration cannot dominate startup.
+            // 启动器可能转交给另一个进程；降低扫描频率，
+            // 避免进程枚举拖慢启动。
             if (DateTime.UtcNow >= nextScan)
             {
                 foreach (var candidate in Process.GetProcesses())
@@ -188,11 +188,11 @@ public sealed class UiApplication : IDisposable
                         }
                         catch (InvalidOperationException)
                         {
-                            // The process exited between enumeration and inspection.
+                            // 进程在枚举与检查之间退出。
                         }
                         catch (ArgumentException)
                         {
-                            // The window handle vanished.
+                            // 窗口句柄已消失。
                         }
                     }
                 }
@@ -218,11 +218,11 @@ public sealed class UiApplication : IDisposable
         }
         catch (InvalidOperationException)
         {
-            // Already exited.
+            // 已经退出。
         }
         catch (System.ComponentModel.Win32Exception)
         {
-            // Access denied or already gone.
+            // 拒绝访问或已不存在。
         }
     }
 

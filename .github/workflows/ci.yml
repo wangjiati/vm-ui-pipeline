@@ -1,4 +1,4 @@
-name: ci
+name: 持续集成
 
 on:
   push:
@@ -18,27 +18,27 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Build
+      - name: 构建
         run: dotnet build VmUiPipeline.sln -c Release -v:minimal
 
-      - name: Unit tests
+      - name: 单元测试
         run: ./tests/VmUiPipeline.Tests/bin/Release/net10.0-windows/VmUiPipeline.Tests.exe
 
-      - name: Install Pester
+      - name: 安装 Pester
         shell: pwsh
         run: Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck
 
-      - name: Host tests
+      - name: 编排层测试
         shell: pwsh
         run: ./tests/run-host-tests.ps1
 
-      - name: Publish runner
+      - name: 发布 Runner
         run: >
           dotnet publish src/VmUiPipeline.Runner -c Release -r win-x64
           --self-contained true -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/publish
 
-      - name: Upload runner
+      - name: 上传 Runner
         uses: actions/upload-artifact@v4
         with:
           name: runner

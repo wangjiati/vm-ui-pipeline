@@ -1,62 +1,46 @@
-# Security model
+# 安全模型
 
-This is a test lab tool. Treat the host, the guest, and the network between them as a
-single trusted test environment, not as production infrastructure.
+这是一个测试实验工具。请把宿主机、客户机以及两者之间的网络视为一个受信任的测试环境，而不是生产基础设施。
 
-## Assets
+## 资产
 
-- Guest local administrator credentials.
-- The application under test and its test data.
-- Screenshots and recordings of the guest desktop.
-- The WinSimpleSSH service, which can start processes as the logged-on user.
+- 客户机本地管理员凭据。
+- 被测应用及其测试数据。
+- 客户机桌面截图与录像。
+- WinSimpleSSH 服务：它可以以已登录用户身份启动进程。
 
-## Credentials
+## 凭据
 
-- Passwords are read from the environment variable named by `vms[].passwordEnv`.
-- The orchestrator passes the password to `SSHC.exe` through the `SSHC_PASSWORD`
-  process environment variable, not as an argument.
-- WinSimpleSSH requires the password in the guest's `server.json`. The file is written
-  over SMB and remains on the guest. Protect it with guest filesystem ACLs and delete
-  it when the VM is retired.
-- SMB uses `net use \\<ip>\c$` with the guest local administrator. The mapping is
-  removed after the run.
-- Passwords are not written to `pipeline.json`, `run.json`, `summary.json`, JUnit, or
-  logs. Review logs before sharing them.
+- 密码从 `vms[].passwordEnv` 指定的环境变量读取。
+- 编排器通过 `SSHC_PASSWORD` 进程环境变量把密码传给 `SSHC.exe`，不作为参数。
+- WinSimpleSSH 要求客户机 `server.json` 中包含密码。该文件经 SMB 写入并留在客户机；请用客户机文件系统 ACL 保护，VM 退役时删除。
+- SMB 使用 `net use \\<ip>\c$` 与客户机本地管理员；运行结束后会删除映射。
+- 密码不会写入 `pipeline.json`、`run.json`、`summary.json`、JUnit 或日志。对外分享日志前请先检查。
 
-## Network
+## 网络
 
-- Use a host-only or NAT VM network. Do not expose the WinSimpleSSH port to a corporate
-  LAN or the internet.
-- Restrict `launcher.ipWhitelist` to the host subnet.
-- Restrict guest firewall rules for 445 and 22222 to the host address.
-- Prefer a dedicated test VM with no domain join, no user data, and no production
-  credentials.
-- Revert to a known snapshot before a run to remove leftovers.
+- 使用 Host-only 或 NAT 虚拟机网络。不要把 WinSimpleSSH 端口暴露到公司内网或互联网。
+- 把 `launcher.ipWhitelist` 限制到宿主机网段。
+- 客户机防火墙中，445 与 22222 只对宿主机地址开放。
+- 优先使用专用测试 VM：不加入域、不含用户数据、不存放生产凭据。
+- 运行前回滚到已知快照，清除残留。
 
-## Least privilege
+## 最小权限
 
-- The guest account must be a local administrator because SMB admin shares, WMI
-  process creation, and service installation require it. Do not use a domain admin.
-- WinSimpleSSH runs as LocalSystem. Its IP allowlist and password are the only
-  authentication in front of process creation as the logged-on user. This is why the
-  network must be isolated.
-- The host process needs permission to map SMB and run `vmrun`; it does not need to be
-  elevated beyond that.
+- 客户机账户必须是本地管理员，因为 SMB 管理共享、WMI 进程创建与服务安装都需要管理员权限。不要使用域管理员。
+- WinSimpleSSH 以 LocalSystem 运行。它的 IP 白名单与密码是“以已登录用户创建进程”之前的唯一认证。因此网络必须隔离。
+- 宿主机进程需要映射 SMB 与执行 `vmrun` 的权限；除此之外不需要额外提权。
 
-## Supply chain
+## 供应链
 
-- WinSimpleSSH is pinned to a commit and built locally; no upstream binary is trusted
-  or redistributed.
-- ffmpeg is a user-supplied guest binary. Verify its source and hash if required.
-- NuGet dependencies are limited to MSTest for the unit-test project. The runner and
-  harness use the Windows Desktop framework.
+- WinSimpleSSH 固定在某个提交并本地构建；不信任、也不分发上游二进制。
+- ffmpeg 是用户自行提供的客户机二进制；如有需要，请校验来源与哈希。
+- NuGet 依赖仅限单元测试项目的 MSTest；Runner 与测试库使用 Windows Desktop 框架。
 
-## Evidence and privacy
+## 证据与隐私
 
-Screenshots and videos capture whatever is on the guest desktop. They can contain
-test data, notifications, account names, or secrets. Store results accordingly:
-restrict access, set retention, and delete them when no longer needed.
+截图与录像会拍下客户机桌面上的一切，可能包含测试数据、通知、账户名或密钥。请按敏感数据管理结果：限制访问、设置保留期、不再需要时删除。
 
-## Reporting a vulnerability
+## 报告漏洞
 
-Do not open a public issue for a vulnerability. Follow [SECURITY.md](../SECURITY.md).
+发现漏洞请不要开公开 issue，按 [SECURITY.md](../SECURITY.md) 处理。

@@ -1,45 +1,42 @@
-# Configuration
+# 配置
 
-`pipeline.json` is validated by [`schema/pipeline.schema.json`](../schema/pipeline.schema.json).
-Relative paths are resolved against the configuration file's directory. Guest paths
-must be absolute Windows paths (`C:\...`).
+`pipeline.json` 由 [`schema/pipeline.schema.json`](../schema/pipeline.schema.json) 校验。相对路径以配置文件所在目录为基准；客户机路径必须是绝对 Windows 路径（`C:\...`）。
 
-## Top level
+## 顶层字段
 
-| Field | Type | Default | Meaning |
+| 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
-| `schemaVersion` | integer | required | Must be `1`. |
-| `guestRoot` | string | `C:\VmUiPipeline` | Staging root inside the guest. |
-| `artifact` | object | required | Application payload. |
-| `runner` | object | required | Guest test host. |
-| `suite` | object | required | Test suite assembly and arguments. |
-| `fixtures` | array | `[]` | Directories copied to the guest before the run. |
-| `launcher` | object | required | Interactive-session launcher (`win-simple-ssh`). |
-| `recording` | object | disabled | Optional MP4 capture. |
-| `vms` | array | required | One entry per guest. |
-| `timeoutMinutes` | integer | `10` | Per-VM result timeout. |
-| `startupTimeoutSeconds` | integer | `60` | Time allowed for the app's main window. |
-| `resultsDirectory` | string | `artifacts/results` | Base directory for host-side results. |
+| `schemaVersion` | 整数 | 必填 | 必须为 `1`。 |
+| `guestRoot` | 字符串 | `C:\VmUiPipeline` | 客户机内的投放根目录。 |
+| `artifact` | 对象 | 必填 | 应用产物。 |
+| `runner` | 对象 | 必填 | 客户机测试宿主。 |
+| `suite` | 对象 | 必填 | 测试套件程序集与参数。 |
+| `fixtures` | 数组 | `[]` | 运行前复制到客户机的目录。 |
+| `launcher` | 对象 | 必填 | 交互式会话启动器（`win-simple-ssh`）。 |
+| `recording` | 对象 | 关闭 | 可选 MP4 录制。 |
+| `vms` | 数组 | 必填 | 每台客户机一项。 |
+| `timeoutMinutes` | 整数 | `10` | 单 VM 结果等待超时。 |
+| `startupTimeoutSeconds` | 整数 | `60` | 等待应用主窗口的时间。 |
+| `resultsDirectory` | 字符串 | `artifacts/results` | 宿主机结果根目录。 |
 
 ## `artifact`
 
-| Field | Type | Meaning |
+| 字段 | 类型 | 含义 |
 | --- | --- | --- |
-| `path` | string | Directory or `.zip` containing the app. |
-| `exe` | string | Executable path relative to the artifact root. |
-| `arguments` | string | Optional arguments passed to the app at launch. |
-| `processName` | string | Optional process name override for window discovery and stale-process cleanup. |
+| `path` | 字符串 | 包含应用的目录或 `.zip`。 |
+| `exe` | 字符串 | 相对于产物根目录的可执行文件路径。 |
+| `arguments` | 字符串 | 启动应用时传入的可选参数。 |
+| `processName` | 字符串 | 可选的进程名覆盖，用于查找主窗口与清理残留进程。 |
 
-The host computes the SHA-256 of the executable, passes it to the runner, and the
-runner refuses to launch on mismatch.
+宿主机计算可执行文件的 SHA-256 并传给 Runner；Runner 在不匹配时拒绝启动。
 
 ## `runner`
 
-| Field | Type | Meaning |
+| 字段 | 类型 | 含义 |
 | --- | --- | --- |
-| `path` | string | Path to `VmUiPipeline.Runner.exe`. Its whole directory is staged. |
+| `path` | 字符串 | `VmUiPipeline.Runner.exe` 的路径。会投放其整个目录。 |
 
-Publish it self-contained:
+自包含发布：
 
 ```powershell
 dotnet publish src/VmUiPipeline.Runner -c Release -r win-x64 --self-contained true `
@@ -48,70 +45,69 @@ dotnet publish src/VmUiPipeline.Runner -c Release -r win-x64 --self-contained tr
 
 ## `suite`
 
-| Field | Type | Meaning |
+| 字段 | 类型 | 含义 |
 | --- | --- | --- |
-| `assembly` | string | Path to the suite assembly. Its whole directory is staged. |
-| `type` | string | Full name of the `IUiTestSuite` implementation. |
-| `folder` | string | Passed as `--folder`. For VM runs this is a **guest** path. |
-| `parameters` | object | Extra `--param key=value` pairs exposed via `context.Parameters`. |
+| `assembly` | 字符串 | 套件程序集路径。会投放其整个目录。 |
+| `type` | 字符串 | `IUiTestSuite` 实现的完整类型名。 |
+| `folder` | 字符串 | 作为 `--folder` 传入。VM 运行时必须是**客户机**路径。 |
+| `parameters` | 对象 | 额外的 `--param key=value`，通过 `context.Parameters` 读取。 |
 
-Example: `"type": "FilesFilterTests.FilesFilterSuite"`, `"folder": "C:\\FilterTest"`.
+示例：`"type": "FilesFilterTests.FilesFilterSuite"`，`"folder": "C:\\FilterTest"`。
 
 ## `fixtures`
 
-| Field | Type | Default | Meaning |
+| 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
-| `source` | string | required | Host directory to copy. |
-| `destination` | string | required | Guest directory. Absolute, or relative to `guestRoot`. |
-| `clean` | boolean | `true` | Remove existing destination contents first. |
+| `source` | 字符串 | 必填 | 宿主机上要复制的目录。 |
+| `destination` | 字符串 | 必填 | 客户机目录。绝对路径，或相对于 `guestRoot`。 |
+| `clean` | 布尔 | `true` | 复制前清空目标目录。 |
 
-Fixtures are recreated per run, so assertions see deterministic content.
+夹具每次运行都会重建，保证断言看到确定的内容。
 
 ## `launcher`
 
-Only `win-simple-ssh` is supported. Host-side UI testing is rejected by design.
+只支持 `win-simple-ssh`。宿主机 UI 测试会被配置校验直接拒绝。
 
-| Field | Type | Default | Meaning |
+| 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
-| `type` | string | `win-simple-ssh` | Must be `win-simple-ssh`. |
-| `sshcPath` | string | required | `SSHC.exe` on the host. |
-| `sshServerExe` | string | required | `SSHServer.exe` staged to the guest. |
-| `port` | integer | `22222` | Service port. |
-| `ipWhitelist` | string[] | required | Guest service allowlist, for example `["192.168.221.*"]`. |
-| `vmrunPath` | string | VMware default | Used only with `-RevertSnapshots`. |
+| `type` | 字符串 | `win-simple-ssh` | 必须为 `win-simple-ssh`。 |
+| `sshcPath` | 字符串 | 必填 | 宿主机上的 `SSHC.exe`。 |
+| `sshServerExe` | 字符串 | 必填 | 投放到客户机的 `SSHServer.exe`。 |
+| `port` | 整数 | `22222` | 服务端口。 |
+| `ipWhitelist` | 字符串数组 | 必填 | 客户机服务白名单，例如 `["192.168.221.*"]`。 |
+| `vmrunPath` | 字符串 | VMware 默认路径 | 仅在 `-RevertSnapshots` 时使用。 |
 
-See [win-simple-ssh.md](win-simple-ssh.md).
+详见 [win-simple-ssh.md](win-simple-ssh.md)。
 
 ## `recording`
 
-| Field | Type | Default | Meaning |
+| 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
-| `enabled` | boolean | `false` | Start ffmpeg for the suite. |
-| `ffmpegPath` | string | `ffmpeg.exe` | ffmpeg path **inside the guest** (or a PATH name). |
-| `fps` | integer | `10` | `gdigrab` frame rate (1–60). |
+| `enabled` | 布尔 | `false` | 是否为套件启动 ffmpeg。 |
+| `ffmpegPath` | 字符串 | `ffmpeg.exe` | **客户机内**的 ffmpeg 路径，或 PATH 中的名称。 |
+| `fps` | 整数 | `10` | `gdigrab` 帧率（1–60）。 |
 
-Output is `<guestRoot>\results\session.mp4` and is copied back with the results.
-Recording is best-effort: a missing ffmpeg logs a warning and the tests still run.
+输出为 `<guestRoot>\results\session.mp4`，随结果一起回传。录屏是尽力而为的能力：ffmpeg 缺失只会记录警告，测试继续。
 
 ## `vms`
 
-| Field | Type | Default | Meaning |
+| 字段 | 类型 | 默认值 | 含义 |
 | --- | --- | --- | --- |
-| `name` | string | required | Stable identifier used in results. |
-| `address` | string | required | IPv4 address or host name reachable from the host. |
-| `user` | string | required | Guest local administrator for SMB/WMI. |
-| `passwordEnv` | string | `VM_<NAME>_PASSWORD` | Environment variable holding the password. |
-| `shareName` | string | `c$` | Admin share. |
-| `vmx` | string | empty | VMX path for `-RevertSnapshots`. |
-| `snapshot` | string | empty | Snapshot name for `-RevertSnapshots`. |
+| `name` | 字符串 | 必填 | 结果中使用的稳定标识。 |
+| `address` | 字符串 | 必填 | 宿主机可访问的 IPv4 地址或主机名。 |
+| `user` | 字符串 | 必填 | 用于 SMB/WMI 的客户机本地管理员。 |
+| `passwordEnv` | 字符串 | `VM_<NAME>_PASSWORD` | 保存密码的环境变量名。 |
+| `shareName` | 字符串 | `c$` | 管理共享。 |
+| `vmx` | 字符串 | 空 | `-RevertSnapshots` 使用的 VMX 路径。 |
+| `snapshot` | 字符串 | 空 | `-RevertSnapshots` 使用的快照名。 |
 
-Passwords are never stored in the configuration. Set them in the host process:
+密码不写入配置文件。请在宿主机进程中设置：
 
 ```powershell
-$env:VM_WIN11_PASSWORD = '<password>'
+$env:VM_WIN11_PASSWORD = '<密码>'
 ```
 
-## CLI
+## 命令行
 
 ```powershell
 ./vm-ui-pipeline.ps1 -Config .\pipeline.json `
@@ -121,16 +117,15 @@ $env:VM_WIN11_PASSWORD = '<password>'
   [-KeepWorkDirectory]
 ```
 
-- `-Vm` selects a subset by `vms[].name`; unknown names fail before running.
-- `-RevertSnapshots` stops the VM, reverts to `snapshot`, starts it headless, and waits
-  for SMB. Requires `vmx` and `snapshot`.
-- `-KeepWorkDirectory` keeps the host temp expansion for inspection.
+- `-Vm` 按 `vms[].name` 选择子集；未知名称会在运行前报错。
+- `-RevertSnapshots` 停止 VM、回滚到 `snapshot`、以无界面方式启动并等待 SMB。需要 `vmx` 与 `snapshot`。
+- `-KeepWorkDirectory` 保留宿主机临时展开目录，便于排查。
 
-## Exit codes
+## 退出码
 
-| Code | Meaning |
+| 退出码 | 含义 |
 | --- | --- |
-| `0` | All selected VMs passed. |
-| `1` | At least one test or VM failed. |
-| `2` | Configuration/environment error before any test. |
-| `3` | At least one VM timed out. |
+| `0` | 所有选中的 VM 通过。 |
+| `1` | 至少一个测试或 VM 失败。 |
+| `2` | 任何测试开始前的配置/环境错误。 |
+| `3` | 至少一个 VM 超时。 |

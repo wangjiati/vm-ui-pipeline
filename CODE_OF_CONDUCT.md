@@ -1,62 +1,48 @@
-# Contributor Covenant Code of Conduct
+# 贡献者公约行为准则
 
-## Our pledge
+## 我们的承诺
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body size,
-visible or invisible disability, ethnicity, sex characteristics, gender identity and
-expression, level of experience, education, socio-economic status, nationality,
-personal appearance, race, caste, color, religion, or sexual identity and orientation.
+作为成员、贡献者和维护者，我们承诺让参与本社区的体验不受骚扰，无论年龄、体型、可见或不可见的残障、族裔、性征、性别认同与表达、经验水平、教育程度、社会经济地位、国籍、外貌、种族、种姓、肤色、宗教或性取向。
 
-We pledge to act and interact in ways that contribute to an open, welcoming, diverse,
-inclusive, and healthy community.
+我们承诺以开放、友好、多元、包容和健康的方式行动与互动。
 
-## Our standards
+## 我们的标准
 
-Examples of behavior that contributes to a positive environment:
+有助于营造积极环境的行为包括：
 
-- Demonstrating empathy and kindness toward other people.
-- Being respectful of differing opinions, viewpoints, and experiences.
-- Giving and gracefully accepting constructive feedback.
-- Accepting responsibility and apologizing to those affected by our mistakes.
-- Focusing on what is best for the community.
+- 对他人展现同理心与善意。
+- 尊重不同的观点、视角与经历。
+- 给出并坦然接受建设性反馈。
+- 承担责任，向受影响的人道歉，并从错误中学习。
+- 关注对社区最有利的事情。
 
-Examples of unacceptable behavior:
+不可接受的行为包括：
 
-- Sexualized language or imagery, and sexual attention or advances of any kind.
-- Trolling, insulting or derogatory comments, and personal or political attacks.
-- Public or private harassment.
-- Publishing others' private information without explicit permission.
-- Other conduct which could reasonably be considered inappropriate in a professional
-  setting.
+- 性化的语言或图像，以及任何形式的性关注或挑逗。
+- 挑衅、侮辱或贬损性评论，以及人身或政治攻击。
+- 公开或私下的骚扰。
+- 未经明确许可发布他人的私人信息。
+- 其他在专业场合可合理认定为不当的行为。
 
-## Enforcement responsibilities
+## 执行责任
 
-Community leaders are responsible for clarifying and enforcing acceptable behavior and
-will take appropriate and fair corrective action in response to any behavior they deem
-inappropriate, threatening, offensive, or harmful.
+社区维护者有责任澄清并执行可接受行为标准，并对不当、威胁、冒犯或有害行为采取适当且公正的纠正措施。
 
-## Scope
+## 适用范围
 
-This Code of Conduct applies within all community spaces and when an individual is
-officially representing the community in public spaces.
+本行为准则适用于所有社区空间，以及个人在公共场合正式代表社区时。
 
-## Enforcement
+## 执行
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to
-the project maintainers through the repository's private contact channels. All
-complaints will be reviewed and investigated promptly and fairly. Maintainers are
-obligated to respect the privacy and security of the reporter.
+如遇辱骂、骚扰或其他不可接受行为，可通过仓库的私有联系渠道向维护者报告。所有投诉都会被及时、公正地审查与调查。维护者有义务尊重报告者的隐私与安全。
 
-## Enforcement guidelines
+## 执行指南
 
-1. **Correction** — a private, written warning for inappropriate language or behavior.
-2. **Warning** — a warning with consequences for continued behavior, including no
-   interaction with the people involved for a specified period.
-3. **Temporary ban** — a temporary ban from any interaction with the community.
-4. **Permanent ban** — a permanent ban from public interaction with the community.
+1. **纠正**：对不当语言或行为进行私下书面警告。
+2. **警告**：警告并说明继续行为的后果，包括在指定时间内不得与相关人员互动。
+3. **临时封禁**：临时禁止与社区的任何互动。
+4. **永久封禁**：永久禁止与社区的公开互动。
 
-## Attribution
+## 来源
 
-This Code of Conduct is adapted from the
-[Contributor Covenant](https://www.contributor-covenant.org/), version 2.1.
+本行为准则改编自 [Contributor Covenant](https://www.contributor-covenant.org/) 2.1 版。

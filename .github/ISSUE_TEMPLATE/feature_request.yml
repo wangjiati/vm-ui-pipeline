@@ -1,31 +1,31 @@
-name: Feature request
-description: Suggest a capability for the VM pipeline
-title: "[Feature] "
+name: 功能请求
+description: 为 VM 流水线提出新能力
+title: "[功能] "
 labels: ["enhancement"]
 body:
   - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: What cannot be done today, and in which VM workflow?
+      label: 问题
+      description: 当前在哪个 VM 流程里做不到什么？
     validations:
       required: true
   - type: textarea
     id: idea
     attributes:
-      label: Proposed solution
+      label: 建议方案
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives considered
+      label: 考虑过的替代方案
     validations:
       required: false
   - type: checkboxes
     id: scope
     attributes:
-      label: Scope
+      label: 范围
       options:
-        - label: This keeps UI execution inside the VM (no host-side UI automation).
+        - label: 该能力仍把 UI 执行限制在虚拟机内（不在宿主机做 UI 自动化）。
           required: true

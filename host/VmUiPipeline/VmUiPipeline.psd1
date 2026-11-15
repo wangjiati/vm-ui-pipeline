@@ -1,12 +1,12 @@
-@{
+﻿@{
     RootModule        = 'VmUiPipeline.psm1'
-    ModuleVersion     = '0.1.0'
+    ModuleVersion     = '0.1.2'
     CompatiblePSEditions = @('Desktop', 'Core')
     GUID              = '29410136-c239-46d0-8892-0d56597ebc5e'
-    Author            = 'VmUiPipeline contributors'
-    CompanyName       = 'VmUiPipeline contributors'
-    Copyright         = '(c) Files Community and VmUiPipeline contributors. MPL-2.0.'
-    Description       = 'Run Windows desktop UI automation tests inside VM interactive sessions.'
+    Author            = 'VmUiPipeline 贡献者'
+    CompanyName       = 'VmUiPipeline 贡献者'
+    Copyright         = '(c) Files Community 与 VmUiPipeline 贡献者。MPL-2.0。'
+    Description       = '在虚拟机交互式会话中运行 Windows 桌面 UI 自动化测试。'
     PowerShellVersion = '5.1'
     FunctionsToExport = @(
         'Import-VmUiPipelineConfig',

@@ -183,7 +183,7 @@ internal static class Program
                 app = null;
             }
 
-            // Finalize the MP4 before summary.json becomes visible to the host.
+            // 在 summary.json 对宿主机可见之前收尾 MP4。
             recorder?.Stop();
 
             if (Interlocked.Exchange(ref _completed, 1) != 0)

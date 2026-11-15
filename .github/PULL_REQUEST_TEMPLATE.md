@@ -1,25 +1,25 @@
-## Summary
+## 摘要
 
-<!-- What changed and why. Link issues with "Fixes #123". -->
+<!-- 改了什么、为什么改。用 "Fixes #123" 关联 issue。 -->
 
-## Verification
+## 验证
 
 - [ ] `dotnet build VmUiPipeline.sln -c Release`
 - [ ] `tests/VmUiPipeline.Tests/bin/Release/net10.0-windows/VmUiPipeline.Tests.exe`
 - [ ] `tests/run-host-tests.ps1`
-- [ ] VM run completed; result directory attached or summarized below
-- [ ] No UI automation, screenshot, or recording was performed on the host
+- [ ] 已完成 VM 运行；附上结果目录或在下方说明
+- [ ] 没有在宿主机上执行 UI 自动化、截图或录屏
 
-### VM run details
+### VM 运行信息
 
-- Guest:
-- Display / DPI:
-- Recording:
-- Result: `X passed, Y failed, Z skipped`
-- Artifacts:
+- 客户机：
+- 显示 / DPI：
+- 录屏：
+- 结果：`X 通过，Y 失败，Z 跳过`
+- 产物：
 
-## Checklist
+## 检查清单
 
-- [ ] Docs updated (`README.md`, `README.zh-CN.md`, `docs/`)
-- [ ] No secrets, `server.json`, screenshots, videos, or WinSimpleSSH binaries committed
-- [ ] `summary.json` remains schema-version compatible
+- [ ] 已更新 `README.md` 与相关 `docs/` 文档
+- [ ] 未提交密码、`server.json`、截图、视频或 WinSimpleSSH 二进制
+- [ ] `summary.json` 仍保持 schema 版本兼容

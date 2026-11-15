@@ -8,8 +8,8 @@ using System.Windows.Automation;
 namespace VmUiPipeline.Testing;
 
 /// <summary>
-/// Test-scoped facade over the launched application and UI Automation. Records one
-/// outcome per <see cref="Test"/> call and writes progress through the supplied logger.
+/// 面向测试的已启动应用与 UI Automation 门面。每次 <see cref="Test"/> 调用记录一条结果，
+/// 并通过传入的日志委托输出进度。
 /// </summary>
 public sealed class UiTestContext
 {
@@ -117,7 +117,7 @@ public sealed class UiTestContext
 
     public void Log(string message) => _log(message);
 
-    /// <summary>Captures the guest desktop and returns the PNG path, or null when disabled.</summary>
+    /// <summary>截取客户机桌面并返回 PNG 路径；禁用时返回 null。</summary>
     public string? CaptureScreenshot(string name)
     {
         if (!_screenshotsEnabled || string.IsNullOrWhiteSpace(_screenshotDirectory))
