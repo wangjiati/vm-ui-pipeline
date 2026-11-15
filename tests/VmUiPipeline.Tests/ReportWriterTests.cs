@@ -17,8 +17,8 @@ public sealed class ReportWriterTests
     public void Initialize()
     {
         _outputDirectory = Path.Combine(
-            Path.GetTempPath(),
-            "vm-ui-pipeline-tests",
+            AppContext.BaseDirectory,
+            "test-temp",
             Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_outputDirectory);
     }
